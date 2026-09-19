@@ -451,7 +451,7 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
         onMouseDown={handleMouseDown}
         onWheel={handleWheel}
         className={cn(
-          'relative overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-800/90 bg-slate-950 shadow-xl min-h-[380px] sm:min-h-[460px] select-none',
+          'relative overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-800/90 bg-slate-950 shadow-xl min-h-95 sm:min-h-115 select-none',
           isPanning ? 'cursor-grabbing' : 'cursor-default'
         )}
       >
@@ -537,7 +537,7 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
         <div className="w-full h-full flex items-center justify-center p-2 sm:p-4 overflow-hidden select-none">
           <svg
             viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
-            className="w-full h-auto max-h-[500px] transition-transform duration-100 ease-out"
+            className="w-full h-auto max-h-125 transition-transform duration-100 ease-out"
             style={{
               transform: `scale(${zoomLevel}) translate(${panOffset.x}px, ${panOffset.y}px)`,
               transformOrigin: 'center center',
