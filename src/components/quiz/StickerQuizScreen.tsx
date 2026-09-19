@@ -42,12 +42,22 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
 }) => {
   const [selectedContinent, setSelectedContinent] = useState<string>(initialContinentId);
   const [quizType, setQuizType] = useState<StickerQuizType>('countries');
-  const [stickerCount, setStickerCount] = useState<number>(8);
+  const stickerCount = 8;
+  const [sessionSeed, setSessionSeed] = useState<number>(0);
 
-  const [sessionData, setSessionData] = useState<StickerQuizSession | null>(null);
-  const [stickers, setStickers] = useState<StickerItem[]>([]);
-  const [targets, setTargets] = useState<StickerTarget[]>([]);
-  const [selectedStickerId, setSelectedStickerId] = useState<string | null>(null);
+  const currentSessionKey = `${scope}-${selectedContinent}-${quizType}-${stickerCount}-${sessionSeed}`;
+  const [prevSessionKey, setPrevSessionKey] = useState<string>(currentSessionKey);
+
+  const initialSession = useMemo(
+    () => generateStickerQuiz(scope, selectedContinent, quizType, stickerCount, SVG_WIDTH, SVG_HEIGHT),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentSessionKey]
+  );
+
+  const [sessionData, setSessionData] = useState<StickerQuizSession>(initialSession);
+  const [stickers, setStickers] = useState<StickerItem[]>(initialSession.stickers);
+  const [targets, setTargets] = useState<StickerTarget[]>(initialSession.targets);
+  const [selectedStickerId, setSelectedStickerId] = useState<string | null>(initialSession.stickers[0]?.id || null);
 
   const [score, setScore] = useState<number>(0);
   const [streak, setStreak] = useState<number>(0);
@@ -74,24 +84,13 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
   const [isGameFinished, setIsGameFinished] = useState<boolean>(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Adaptive scale of targets / pins inversely proportional to zoom
-  const targetScale = Math.max(0.2, 1 / Math.pow(zoomLevel, 0.85));
-
-  // Initialize or reset game session with D3 Natural Earth vector cartography
-  const initSession = () => {
-    const session = generateStickerQuiz(
-      scope,
-      selectedContinent,
-      quizType,
-      stickerCount,
-      SVG_WIDTH,
-      SVG_HEIGHT
-    );
-
-    setSessionData(session);
-    setStickers(session.stickers);
-    setTargets(session.targets);
-    setSelectedStickerId(session.stickers[0]?.id || null);
+  // Reset during render if session parameters changed
+  if (prevSessionKey !== currentSessionKey) {
+    setPrevSessionKey(currentSessionKey);
+    setSessionData(initialSession);
+    setStickers(initialSession.stickers);
+    setTargets(initialSession.targets);
+    setSelectedStickerId(initialSession.stickers[0]?.id || null);
     setScore(0);
     setStreak(0);
     setMaxStreak(0);
@@ -103,12 +102,15 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
     setTimerSeconds(0);
     setZoomLevel(1);
     setPanOffset({ x: 0, y: 0 });
-  };
+  }
 
-  useEffect(() => {
-    initSession();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scope, selectedContinent, quizType, stickerCount]);
+  // Adaptive scale of targets / pins inversely proportional to zoom
+  const targetScale = Math.max(0.2, 1 / Math.pow(zoomLevel, 0.85));
+
+  // Initialize or re-roll game session
+  const initSession = () => {
+    setSessionSeed((s) => s + 1);
+  };
 
   // Timer runner
   useEffect(() => {
