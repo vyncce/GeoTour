@@ -114,7 +114,7 @@ export const QuizHub: React.FC<QuizHubProps> = ({
           {/* World Sticker Quiz Launcher Card */}
           <div
             onClick={onOpenWorldQuiz}
-            className="group cursor-pointer p-5 rounded-3xl border border-emerald-500/30 bg-linear-to-br from-emerald-500/10 via-white dark:via-slate-900 to-teal-500/10 hover:border-emerald-500 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 relative overflow-hidden flex flex-col justify-between min-h-[140px]"
+            className="group cursor-pointer p-5 rounded-3xl border border-emerald-500/30 bg-linear-to-br from-emerald-500/10 via-white dark:via-slate-900 to-teal-500/10 hover:border-emerald-500 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 relative overflow-hidden flex flex-col justify-between min-h-35"
           >
             <div className="flex items-start justify-between mb-3">
               <div className="p-3 rounded-2xl bg-emerald-600 text-white shadow-md shadow-emerald-600/30 group-hover:scale-110 transition-transform">
@@ -135,7 +135,7 @@ export const QuizHub: React.FC<QuizHubProps> = ({
           {/* Continent Sticker Quiz Launcher Card */}
           <div
             onClick={onOpenContinentQuiz}
-            className="group cursor-pointer p-5 rounded-3xl border border-teal-500/30 bg-linear-to-br from-teal-500/10 via-white dark:via-slate-900 to-sky-500/10 hover:border-teal-500 hover:shadow-xl hover:shadow-teal-500/10 transition-all duration-300 relative overflow-hidden flex flex-col justify-between min-h-[140px]"
+            className="group cursor-pointer p-5 rounded-3xl border border-teal-500/30 bg-linear-to-br from-teal-500/10 via-white dark:via-slate-900 to-sky-500/10 hover:border-teal-500 hover:shadow-xl hover:shadow-teal-500/10 transition-all duration-300 relative overflow-hidden flex flex-col justify-between min-h-35"
           >
             <div className="flex items-start justify-between mb-3">
               <div className="p-3 rounded-2xl bg-teal-600 text-white shadow-md shadow-teal-600/30 group-hover:scale-110 transition-transform">
