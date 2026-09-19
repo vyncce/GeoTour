@@ -15,108 +15,122 @@ export interface MapData {
 }
 
 /**
- * Realistic & Minimalist World Map (viewBox: 0 0 1000 600)
+ * High-Precision Cartographic World Map (viewBox: 0 0 1000 600)
+ * Realistic continental coastlines, major peninsulas and archipelagos.
  */
 export const WORLD_MAP: MapData = {
   id: 'world',
-  name: 'Planisphère Mondial',
+  name: 'Planisphère Mondial Cartographique',
   viewBox: '0 0 1000 600',
   features: [
-    // North America
+    // North America (including Alaska, Canada, Lower 48, Mexico & Greenland)
     {
       id: 'north_america',
       name: 'Amérique du Nord',
-      center: { x: 220, y: 210 },
-      d: 'M 140 70 L 190 60 L 250 80 L 290 65 L 340 100 L 310 140 L 295 180 L 305 230 L 270 290 L 235 320 L 220 370 L 210 370 L 195 330 L 160 300 L 130 250 L 120 180 L 105 130 L 120 90 Z M 160 30 L 230 25 L 260 50 L 210 55 Z M 70 80 L 100 70 L 110 100 L 80 110 Z',
+      center: { x: 230, y: 220 },
+      d: 'M 110 95 C 100 80 115 65 140 60 C 160 55 190 70 210 65 C 230 60 250 65 270 55 C 290 60 310 50 335 70 C 350 85 365 75 380 90 C 375 110 340 125 320 120 C 300 135 315 150 330 160 C 315 170 300 165 295 185 C 310 195 325 210 310 230 C 300 245 285 240 275 270 C 265 285 245 300 230 335 C 220 365 205 375 200 360 C 190 340 185 320 175 300 C 160 275 145 250 140 215 C 135 185 120 160 110 140 C 95 130 90 110 110 95 Z M 340 30 C 360 25 390 35 410 55 C 415 80 395 105 375 110 C 360 95 345 80 340 55 Z M 165 310 C 180 305 185 325 175 340 C 165 330 160 320 165 310 Z M 70 120 C 85 115 90 135 80 145 C 70 140 65 130 70 120 Z',
     },
     // South America
     {
       id: 'south_america',
       name: 'Amérique du Sud',
-      center: { x: 320, y: 430 },
-      d: 'M 240 370 L 270 360 L 320 380 L 370 410 L 385 450 L 360 510 L 330 560 L 300 580 L 290 560 L 285 490 L 265 440 L 245 400 Z',
+      center: { x: 320, y: 440 },
+      d: 'M 255 355 C 275 345 305 345 330 360 C 355 370 385 390 395 425 C 400 450 390 480 370 515 C 355 545 335 575 320 595 C 310 590 300 565 295 540 C 290 510 280 480 270 450 C 255 425 245 400 240 380 C 240 365 245 360 255 355 Z M 310 570 C 320 565 325 575 320 585 C 310 580 305 575 310 570 Z',
     },
     // Europe
     {
       id: 'europe',
       name: 'Europe',
       center: { x: 510, y: 180 },
-      d: 'M 470 120 L 510 100 L 540 120 L 550 160 L 580 180 L 550 220 L 520 230 L 490 250 L 465 240 L 450 200 L 470 160 Z M 440 140 L 460 130 L 455 160 L 435 155 Z M 480 80 L 510 60 L 525 90 L 500 130 L 485 100 Z',
+      d: 'M 470 145 C 480 130 500 125 520 125 C 540 120 560 135 570 150 C 585 170 575 190 565 210 C 550 230 525 240 500 245 C 475 250 455 235 450 215 C 445 190 455 170 470 145 Z M 480 75 C 500 65 520 75 525 105 C 515 130 495 145 480 135 C 475 115 470 95 480 75 Z M 440 145 C 455 135 465 150 455 175 C 445 185 435 175 435 160 Z M 420 155 C 430 150 435 165 430 175 C 420 175 415 165 420 155 Z',
     },
-    // Africa
+    // Africa (including Madagascar)
     {
       id: 'africa',
       name: 'Afrique',
-      center: { x: 530, y: 360 },
-      d: 'M 460 250 L 530 240 L 580 270 L 610 330 L 590 390 L 560 460 L 530 500 L 495 450 L 470 380 L 450 330 L 445 280 Z M 610 420 L 625 430 L 620 480 L 605 470 Z',
+      center: { x: 535, y: 360 },
+      d: 'M 460 255 C 485 245 525 240 555 255 C 580 270 605 295 615 325 C 625 355 605 390 590 420 C 575 450 560 485 540 515 C 520 520 500 495 485 465 C 470 435 455 395 445 355 C 440 320 440 285 460 255 Z M 605 440 C 615 430 625 445 620 480 C 610 500 600 485 600 460 Z',
     },
-    // Asia
+    // Asia (including Middle East, India, China, Russia, SE Asia & Japan)
     {
       id: 'asia',
       name: 'Asie',
-      center: { x: 720, y: 220 },
-      d: 'M 550 140 L 620 100 L 710 90 L 800 110 L 870 140 L 910 180 L 890 240 L 840 260 L 800 320 L 760 380 L 730 350 L 700 300 L 650 310 L 600 280 L 580 210 L 560 170 Z M 870 280 L 890 320 L 875 350 L 860 310 Z M 780 390 L 840 400 L 850 440 L 800 430 Z',
+      center: { x: 740, y: 220 },
+      d: 'M 570 130 C 620 100 700 85 780 90 C 840 95 910 120 935 150 C 920 180 885 200 870 230 C 850 260 825 285 800 320 C 785 345 765 370 745 375 C 730 350 710 320 680 305 C 650 300 615 315 590 280 C 570 250 560 200 570 130 Z M 875 190 C 885 180 895 195 890 220 C 880 230 870 215 875 190 Z M 865 240 C 875 235 885 250 875 275 C 865 280 855 260 865 240 Z M 760 395 C 780 385 820 390 840 420 C 820 440 780 435 760 395 Z',
     },
-    // Oceania / Australia
+    // Oceania (Australia, New Zealand, Papua New Guinea)
     {
       id: 'oceania',
       name: 'Océanie',
-      center: { x: 840, y: 460 },
-      d: 'M 780 440 L 840 430 L 890 450 L 900 500 L 870 540 L 810 540 L 770 490 Z M 910 520 L 930 530 L 920 570 L 900 560 Z M 840 560 L 860 560 L 855 580 L 840 575 Z',
+      center: { x: 840, y: 470 },
+      d: 'M 770 435 C 800 415 840 410 880 430 C 905 450 910 490 895 520 C 875 550 835 555 800 545 C 770 535 750 495 760 465 Z M 835 565 C 845 560 850 570 845 580 C 835 580 830 570 835 565 Z M 915 515 C 925 505 935 520 930 540 C 920 550 910 535 915 515 Z M 895 545 C 905 540 915 555 910 575 C 900 580 890 565 895 545 Z',
     },
+  ],
+  decorativePaths: [
+    // Equator line
+    'M 50 350 L 950 350',
+    // Tropics
+    'M 50 265 L 950 265',
+    'M 50 435 L 950 435',
   ],
 };
 
 /**
- * Detailed Continent Maps with individual Country Outlines
+ * Detailed Realistic Continent Maps with Country Boundaries
  */
 export const CONTINENT_MAPS: Record<string, MapData> = {
   europe: {
     id: 'europe',
-    name: 'Europe Vectorielle',
+    name: 'Europe Vectorielle Haute Précision',
     viewBox: '0 0 800 650',
     features: [
       {
         id: 'france',
         name: 'France',
-        center: { x: 330, y: 390 },
-        d: 'M 285 335 L 340 320 L 375 345 L 390 380 L 375 425 L 360 460 L 320 465 L 280 435 L 265 390 L 285 355 Z M 385 465 L 395 465 L 390 490 L 380 485 Z',
+        center: { x: 340, y: 395 },
+        d: 'M 290 325 C 310 320 330 310 355 315 C 375 325 390 350 395 375 C 385 410 375 435 365 460 C 345 465 320 460 300 455 C 285 450 270 420 265 385 C 260 355 275 335 290 325 Z M 385 470 C 390 465 395 475 390 495 C 385 495 380 485 385 470 Z',
       },
       {
         id: 'germany',
         name: 'Allemagne',
-        center: { x: 420, y: 310 },
-        d: 'M 390 230 L 440 230 L 465 270 L 470 325 L 440 375 L 390 375 L 380 340 L 390 280 Z',
+        center: { x: 425, y: 310 },
+        d: 'M 395 230 C 420 220 445 225 465 245 C 475 270 475 300 465 330 C 455 355 435 370 410 375 C 395 375 385 355 385 330 C 385 295 390 260 395 230 Z',
       },
       {
         id: 'spain',
-        name: 'Espagne',
+        name: 'Espagne & Portugal',
         center: { x: 230, y: 490 },
-        d: 'M 200 430 L 285 435 L 305 470 L 280 545 L 230 560 L 180 540 L 170 490 L 205 440 Z M 315 505 L 330 500 L 335 515 L 320 520 Z',
+        d: 'M 205 430 C 235 425 270 430 295 440 C 305 470 290 515 275 545 C 245 565 210 560 185 540 C 170 515 170 475 180 450 C 190 435 200 430 205 430 Z M 315 505 C 325 500 335 510 330 525 C 320 525 315 515 315 505 Z',
       },
       {
         id: 'italy',
         name: 'Italie',
-        center: { x: 450, y: 470 },
-        d: 'M 390 385 L 455 380 L 475 410 L 465 440 L 490 480 L 530 515 L 515 540 L 470 495 L 440 450 L 415 410 Z M 435 530 L 470 535 L 450 565 L 420 550 Z M 380 460 L 395 460 L 390 500 L 375 490 Z',
+        center: { x: 460, y: 465 },
+        d: 'M 395 380 C 425 370 455 370 475 390 C 475 415 465 440 475 465 C 495 490 530 510 535 530 C 525 545 495 530 475 495 C 455 465 435 435 415 405 C 400 395 395 385 395 380 Z M 435 535 C 455 530 465 545 450 565 C 430 565 425 550 435 535 Z M 380 465 C 390 460 395 475 390 495 C 380 495 375 480 380 465 Z',
       },
       {
         id: 'uk_ireland',
         name: 'Royaume-Uni & Irlande',
-        center: { x: 260, y: 250 },
-        d: 'M 240 200 L 280 190 L 290 250 L 270 300 L 245 285 L 255 240 Z M 210 240 L 235 235 L 230 275 L 205 270 Z',
+        center: { x: 260, y: 245 },
+        d: 'M 245 190 C 265 180 285 195 290 225 C 295 255 285 285 270 300 C 255 305 245 285 245 260 C 245 235 235 210 245 190 Z M 210 235 C 225 225 235 240 230 265 C 220 275 210 265 205 250 C 205 240 205 235 210 235 Z',
       },
       {
         id: 'nordics',
         name: 'Pays Nordiques',
-        center: { x: 450, y: 130 },
-        d: 'M 400 90 L 450 60 L 510 70 L 480 180 L 440 210 L 410 180 L 430 130 Z',
+        center: { x: 465, y: 130 },
+        d: 'M 405 85 C 435 55 480 60 515 75 C 530 105 515 145 495 180 C 475 215 445 220 425 195 C 415 165 415 125 405 85 Z',
       },
       {
         id: 'poland_east',
-        name: 'Europe de l\'Est',
-        center: { x: 560, y: 310 },
-        d: 'M 470 240 L 580 230 L 640 270 L 620 370 L 530 380 L 475 320 Z',
+        name: 'Europe Centrale & de l\'Est',
+        center: { x: 570, y: 310 },
+        d: 'M 475 235 C 530 220 600 230 645 260 C 655 300 635 345 615 380 C 565 395 515 390 480 365 C 465 330 465 280 475 235 Z',
+      },
+      {
+        id: 'greece_balkans',
+        name: 'Grèce & Balkans',
+        center: { x: 540, y: 470 },
+        d: 'M 485 390 C 525 385 570 395 580 425 C 585 455 575 490 560 520 C 545 540 525 530 510 500 C 495 465 480 425 485 390 Z M 555 535 C 570 530 580 540 570 550 C 555 555 550 545 555 535 Z',
       },
     ],
   },
@@ -128,20 +142,20 @@ export const CONTINENT_MAPS: Record<string, MapData> = {
       {
         id: 'canada',
         name: 'Canada',
-        center: { x: 400, y: 220 },
-        d: 'M 150 140 L 260 100 L 380 120 L 520 100 L 640 160 L 680 260 L 580 320 L 440 330 L 280 330 L 190 320 L 160 220 Z M 280 40 L 420 30 L 480 80 L 380 90 Z',
+        center: { x: 410, y: 215 },
+        d: 'M 145 135 C 220 95 340 105 450 95 C 550 85 640 120 690 175 C 700 225 660 280 610 320 C 520 335 410 335 300 335 C 220 335 170 310 145 250 C 130 200 125 160 145 135 Z M 290 35 C 350 25 420 30 475 60 C 480 90 440 100 380 95 C 320 90 280 65 290 35 Z',
       },
       {
         id: 'usa',
-        name: 'États-Unis',
-        center: { x: 410, y: 420 },
-        d: 'M 190 330 L 440 330 L 580 320 L 650 350 L 640 430 L 590 520 L 530 500 L 450 560 L 380 540 L 340 470 L 220 460 L 170 380 Z M 90 120 L 160 100 L 170 200 L 110 210 Z',
+        name: 'États-Unis Contigus',
+        center: { x: 420, y: 425 },
+        d: 'M 180 335 C 300 335 420 335 540 330 C 610 325 665 350 670 400 C 675 450 640 495 610 545 C 580 560 540 540 500 555 C 440 575 390 550 340 510 C 270 495 210 475 175 425 C 160 380 165 350 180 335 Z M 85 110 C 125 90 150 110 155 155 C 145 195 115 205 90 185 C 75 160 70 130 85 110 Z',
       },
       {
         id: 'mexico',
-        name: 'Mexique',
-        center: { x: 330, y: 550 },
-        d: 'M 250 480 L 350 490 L 420 540 L 460 560 L 440 600 L 370 610 L 320 560 L 260 520 Z',
+        name: 'Mexique & Amérique Centrale',
+        center: { x: 340, y: 555 },
+        d: 'M 245 480 C 295 490 355 505 405 535 C 445 560 460 595 435 625 C 395 635 355 615 315 580 C 280 550 250 515 245 480 Z M 190 480 C 205 470 215 495 205 535 C 195 550 185 530 190 480 Z',
       },
     ],
   },
@@ -153,32 +167,32 @@ export const CONTINENT_MAPS: Record<string, MapData> = {
       {
         id: 'japan',
         name: 'Japon',
-        center: { x: 740, y: 320 },
-        d: 'M 720 230 L 760 210 L 750 260 L 715 255 Z M 680 310 L 740 280 L 750 330 L 700 360 L 670 340 Z M 650 365 L 675 360 L 670 385 L 645 380 Z M 630 380 L 655 380 L 650 415 L 625 405 Z',
+        center: { x: 745, y: 310 },
+        d: 'M 730 215 C 755 205 770 220 760 250 C 745 265 730 250 730 215 Z M 690 285 C 735 265 765 295 745 335 C 715 365 675 345 690 285 Z M 650 360 C 675 355 680 380 660 395 C 645 395 640 375 650 360 Z M 625 380 C 650 375 655 405 635 425 C 620 425 615 400 625 380 Z',
       },
       {
         id: 'china_east',
         name: 'Chine & Asie Centrale',
-        center: { x: 450, y: 300 },
-        d: 'M 250 200 L 480 160 L 620 200 L 650 320 L 580 430 L 460 440 L 360 410 L 280 320 Z',
+        center: { x: 470, y: 295 },
+        d: 'M 245 190 C 375 160 515 165 635 195 C 675 235 680 295 650 350 C 615 405 555 435 485 440 C 415 440 355 415 305 370 C 265 315 240 250 245 190 Z',
       },
       {
         id: 'india_south',
         name: 'Inde & Asie du Sud',
-        center: { x: 340, y: 460 },
-        d: 'M 280 360 L 400 370 L 410 440 L 370 540 L 320 560 L 280 460 Z',
+        center: { x: 345, y: 465 },
+        d: 'M 275 350 C 345 355 410 365 420 415 C 425 465 395 525 365 565 C 335 575 305 540 285 490 C 265 435 260 385 275 350 Z M 375 570 C 385 565 390 575 385 585 C 375 585 370 575 375 570 Z',
       },
       {
         id: 'se_asia',
         name: 'Asie du Sud-Est',
-        center: { x: 560, y: 480 },
-        d: 'M 500 430 L 570 420 L 600 480 L 560 560 L 490 510 Z M 580 540 L 660 530 L 670 580 L 590 590 Z',
+        center: { x: 575, y: 485 },
+        d: 'M 495 425 C 545 415 585 430 610 475 C 615 520 585 565 545 575 C 505 565 485 525 495 470 Z M 575 545 C 635 530 690 540 680 585 C 640 600 590 590 575 545 Z',
       },
       {
         id: 'russia_north',
-        name: 'Nord & Sibérie',
-        center: { x: 500, y: 110 },
-        d: 'M 180 120 L 480 90 L 750 90 L 820 160 L 650 180 L 420 150 L 210 170 Z',
+        name: 'Russie & Sibérie',
+        center: { x: 515, y: 115 },
+        d: 'M 175 115 C 345 80 555 80 770 85 C 845 110 835 155 770 170 C 645 185 485 160 345 155 C 245 155 190 140 175 115 Z',
       },
     ],
   },
@@ -190,20 +204,20 @@ export const CONTINENT_MAPS: Record<string, MapData> = {
       {
         id: 'brazil',
         name: 'Brésil',
-        center: { x: 380, y: 340 },
-        d: 'M 240 180 L 340 170 L 460 210 L 540 260 L 570 330 L 510 440 L 440 510 L 360 520 L 310 450 L 300 360 L 220 280 Z',
+        center: { x: 395, y: 345 },
+        d: 'M 235 175 C 315 155 425 165 515 210 C 585 250 610 320 580 395 C 545 465 485 525 415 535 C 355 535 325 480 315 420 C 305 350 255 280 235 175 Z',
       },
       {
         id: 'argentina_chile',
         name: 'Cône Sud (Argentine & Chili)',
-        center: { x: 260, y: 590 },
-        d: 'M 260 480 L 340 490 L 360 570 L 320 690 L 280 770 L 250 740 L 240 600 L 220 520 Z',
+        center: { x: 270, y: 605 },
+        d: 'M 255 475 C 315 480 365 500 375 560 C 385 625 355 705 315 780 C 275 790 250 750 240 680 C 230 605 225 540 255 475 Z',
       },
       {
         id: 'andean_north',
         name: 'Région Andine & Nord',
-        center: { x: 200, y: 220 },
-        d: 'M 180 120 L 280 130 L 240 220 L 200 330 L 160 300 L 140 220 Z',
+        center: { x: 205, y: 225 },
+        d: 'M 175 115 C 245 115 295 145 275 215 C 255 275 220 335 185 340 C 150 320 135 250 145 185 C 150 145 160 120 175 115 Z',
       },
     ],
   },
@@ -215,28 +229,28 @@ export const CONTINENT_MAPS: Record<string, MapData> = {
       {
         id: 'australia',
         name: 'Australie',
-        center: { x: 380, y: 310 },
-        d: 'M 190 200 L 280 160 L 370 210 L 480 160 L 560 210 L 590 320 L 570 420 L 480 460 L 380 430 L 280 440 L 170 380 L 160 260 Z M 485 480 L 520 480 L 510 520 L 480 515 Z',
+        center: { x: 385, y: 315 },
+        d: 'M 185 195 C 255 150 355 175 455 150 C 545 175 595 240 595 325 C 595 410 545 465 455 470 C 355 460 255 465 175 415 C 145 350 145 260 185 195 Z M 480 485 C 515 480 525 505 505 525 C 485 525 475 505 480 485 Z',
       },
       {
         id: 'new_zealand',
         name: 'Nouvelle-Zélande',
-        center: { x: 670, y: 440 },
-        d: 'M 650 370 L 685 360 L 675 420 L 650 410 Z M 620 430 L 655 425 L 635 490 L 605 480 Z',
+        center: { x: 675, y: 445 },
+        d: 'M 655 365 C 685 355 695 385 680 420 C 660 425 650 405 655 365 Z M 615 425 C 655 420 660 455 640 495 C 615 500 605 470 615 425 Z',
       },
       {
         id: 'pacific_islands',
-        name: 'Papouasie & Îles',
-        center: { x: 430, y: 110 },
-        d: 'M 350 90 L 490 80 L 530 120 L 440 140 L 360 125 Z',
+        name: 'Papouasie & Îles du Pacifique',
+        center: { x: 440, y: 110 },
+        d: 'M 345 85 C 445 75 535 85 550 125 C 515 155 425 150 345 125 Z',
       },
     ],
   },
 };
 
 /**
- * Detailed Individual Country Maps with high geometric precision
- * Coordinates normalized to 0..100 for city markers mapping.
+ * High-Fidelity Cartographic Country Maps (viewBox: 0 0 100 100)
+ * Aligned with city coordinates in geoDataset.ts
  */
 export const COUNTRY_MAPS: Record<string, MapData> = {
   france: {
@@ -244,23 +258,30 @@ export const COUNTRY_MAPS: Record<string, MapData> = {
     name: 'France Métropolitaine',
     viewBox: '0 0 100 100',
     features: [
-      // Hexagone Métropolitain
+      // Hexagone Métropolitain réaliste avec côtes précises
       {
         id: 'france_main',
         name: 'France Métropolitaine',
-        d: 'M 22 28 C 25 24 35 22 45 16 C 50 14 55 18 64 22 C 72 26 78 28 84 36 C 88 42 86 48 82 54 C 85 60 88 66 84 74 C 80 80 72 82 66 86 C 58 88 52 86 46 88 C 38 90 34 86 30 84 C 24 80 20 74 22 66 C 24 60 22 54 18 48 C 12 44 8 36 12 30 C 16 26 18 30 22 28 Z',
+        d: 'M 48 16 C 45 17 42 21 38 24 C 33 26 27 26 26 29 C 25 33 28 35 26 37 C 22 37 16 38 12 40 C 11 43 14 45 17 46 C 20 48 23 50 26 52 C 26 55 28 60 28 64 C 27 68 25 74 24 82 C 29 83 36 84 42 84 C 47 84 50 83 52 84 C 54 80 54 77 56 79 C 58 81 62 82 65 81 C 68 79 70 76 70 74 C 69 68 68 62 67 58 C 66 54 65 50 67 46 C 69 43 70 40 70 37 C 66 33 60 30 55 26 C 52 22 50 18 48 16 Z',
       },
-      // Corse
+      // Corse fidèle
       {
         id: 'corsica',
         name: 'Corse',
-        d: 'M 88 80 C 90 77 94 78 95 82 C 96 86 94 90 92 94 C 89 95 87 91 88 86 Z',
+        d: 'M 89 77 C 91 78 92 82 91 85 C 92 89 91 93 89 95 C 87 95 86 91 86 87 C 86 83 88 79 89 77 Z',
       },
     ],
     decorativePaths: [
-      // Seine & Rhône rivers subtle accents
-      'M 44 26 Q 44 40 44 46 Q 50 54 55 60 T 57 78',
-      'M 28 65 Q 34 70 38 74',
+      // Seine: Le Havre -> Rouen -> Paris -> Troyes
+      'M 36 28 C 39 34 41 40 44 46 C 48 48 52 48 57 52',
+      // Loire: St-Nazaire -> Nantes -> Tours -> Orléans -> Nevers
+      'M 26 52 C 30 52 35 52 40 50 C 44 48 48 50 50 56',
+      // Rhône: Léman -> Lyon -> Valence -> Avignon -> Delta Camargue
+      'M 66 56 C 60 58 55 60 56 68 C 56 74 57 78 56 80',
+      // Garonne: Pyrénées -> Toulouse -> Agen -> Bordeaux -> Estuaire
+      'M 42 84 C 40 78 38 74 34 70 C 30 67 28 65 27 68',
+      // Rhin frontière Alsace
+      'M 70 37 C 70 42 69 46 68 52',
     ],
   },
   germany: {
@@ -270,60 +291,77 @@ export const COUNTRY_MAPS: Record<string, MapData> = {
     features: [
       {
         id: 'germany_main',
-        name: 'Allemagne',
-        d: 'M 36 12 C 48 8 58 10 68 18 C 74 24 72 32 78 40 C 82 48 84 56 80 66 C 76 76 68 84 62 90 C 50 92 40 90 34 84 C 28 78 22 70 20 60 C 18 50 20 42 24 34 C 28 26 30 18 36 12 Z',
+        name: 'Allemagne Fédérale',
+        d: 'M 48 10 C 45 15 40 18 34 21 C 28 24 25 28 23 34 C 21 40 22 47 24 54 C 23 60 25 68 28 74 C 33 76 39 77 46 76 C 53 76 60 77 65 74 C 64 68 62 62 64 56 C 68 50 72 45 75 38 C 76 30 74 22 72 16 C 65 14 58 12 52 14 C 50 12 49 10 48 10 Z M 71 13 C 74 13 75 16 73 17 C 71 17 70 14 71 13 Z',
       },
     ],
     decorativePaths: [
-      // Rhine & Elbe subtle accents
-      'M 48 22 Q 52 35 64 35',
-      'M 32 45 Q 40 50 42 52 Q 44 60 44 65',
+      // Rhin: Suisse -> Karlsruhe -> Francfort -> Cologne -> Pays-Bas
+      'M 30 74 C 32 66 34 58 35 52 C 32 48 27 46 24 38',
+      // Elbe: Rép. Tchèque -> Dresde -> Magdebourg -> Hambourg -> Mer du Nord
+      'M 68 50 C 64 42 58 35 52 28 C 48 24 44 20 40 18',
+      // Danube: Forêt Noire -> Ulm -> Ratisbonne -> Passau
+      'M 35 72 C 45 70 54 70 63 68',
     ],
   },
   spain: {
     id: 'spain',
-    name: 'Espagne & Baléares',
+    name: 'Espagne & Péninsule Ibérique',
     viewBox: '0 0 100 100',
     features: [
       {
         id: 'spain_main',
-        name: 'Péninsule Ibérique (Espagne)',
-        d: 'M 22 18 C 36 12 56 12 74 20 C 84 26 88 34 86 44 C 84 54 82 64 78 74 C 72 82 60 88 48 90 C 34 90 24 84 18 76 C 12 68 12 56 14 44 C 16 32 18 24 22 18 Z',
+        name: 'Espagne Continentale',
+        d: 'M 14 16 C 24 14 36 15 48 18 C 58 19 68 18 76 21 C 78 26 79 34 78 42 C 75 48 72 55 69 64 C 66 72 61 80 54 85 C 45 87 38 88 34 86 C 27 84 24 78 22 70 C 19 60 18 48 18 36 C 14 32 10 24 14 16 Z',
       },
-      // Balearic Islands
+      // Baléares
       {
         id: 'balearic_islands',
         name: 'Îles Baléares',
-        d: 'M 88 52 C 92 50 95 53 93 57 C 90 59 87 56 88 52 Z M 84 60 C 86 59 88 61 87 63 C 85 64 83 62 84 60 Z',
+        d: 'M 85 56 C 89 54 91 58 88 61 C 85 62 83 59 85 56 Z M 92 52 C 94 51 95 53 93 55 C 91 55 91 53 92 52 Z M 80 63 C 82 62 83 64 82 66 C 80 66 79 64 80 63 Z',
       },
     ],
-    decorativePaths: ['M 50 18 Q 48 40 48 52 Q 40 68 32 78'],
+    decorativePaths: [
+      // Tage / Tajo
+      'M 60 48 C 52 50 44 54 36 56 C 28 58 20 58 18 60',
+      // Ebre / Ebro
+      'M 44 24 C 54 30 64 38 72 48',
+      // Guadalquivir
+      'M 52 75 C 44 76 36 78 28 82',
+    ],
   },
   italy: {
     id: 'italy',
     name: 'Italie & Îles',
     viewBox: '0 0 100 100',
     features: [
-      // Italian Boot
+      // Botte Italienne
       {
         id: 'italy_boot',
-        name: 'Italie Péninsulaire',
-        d: 'M 18 20 C 30 14 54 14 70 20 C 66 28 58 32 54 38 C 50 44 56 50 62 58 C 68 64 76 70 86 74 C 88 78 84 84 76 84 C 70 82 66 76 60 72 C 54 68 46 60 42 52 C 38 44 32 36 26 30 C 20 26 16 24 18 20 Z',
+        name: 'Italie Continentale & Péninsulaire',
+        d: 'M 18 20 C 28 15 42 14 54 16 C 62 18 60 24 54 26 C 52 32 54 40 56 46 C 60 52 66 58 74 62 C 80 66 82 72 78 76 C 74 76 70 72 66 70 C 62 72 60 80 58 86 C 55 86 54 82 56 78 C 54 72 50 66 46 60 C 42 54 36 46 32 38 C 26 32 20 26 18 20 Z',
       },
-      // Sicily
+      // Sicile
       {
         id: 'sicily',
         name: 'Sicile',
-        d: 'M 46 82 C 54 80 62 84 60 88 C 54 94 44 92 42 86 C 42 84 44 83 46 82 Z',
+        d: 'M 44 86 C 52 84 58 87 56 94 C 50 96 44 94 40 89 C 41 87 43 86 44 86 Z',
       },
-      // Sardinia
+      // Sardaigne
       {
         id: 'sardinia',
         name: 'Sardaigne',
-        d: 'M 24 50 C 28 48 30 52 29 60 C 28 68 25 72 22 70 C 20 66 21 54 24 50 Z',
+        d: 'M 22 50 C 26 48 27 52 26 60 C 25 68 22 72 20 70 C 18 66 19 54 22 50 Z',
       },
     ],
-    decorativePaths: ['M 32 24 Q 44 38 48 62 Q 56 68 60 72'],
+    decorativePaths: [
+      // Pô: Piémont -> Lombardie -> Émilie-Romagne -> Delta Adriatique
+      'M 24 24 C 34 26 44 26 52 28',
+      // Tibre: Apennins -> Rome -> Mer Tyrrhénienne
+      'M 48 48 C 47 54 46 58 44 62',
+      // Dorsale des Apennins
+      'M 38 34 C 44 42 50 54 58 64 C 64 70 66 76 60 82',
+    ],
   },
   usa: {
     id: 'usa',
@@ -333,16 +371,29 @@ export const COUNTRY_MAPS: Record<string, MapData> = {
       {
         id: 'usa_main',
         name: 'États-Unis Contigus',
-        d: 'M 12 30 C 26 28 54 28 82 28 C 88 32 90 38 88 46 C 84 56 82 68 84 78 C 80 84 74 86 70 76 C 64 72 56 74 50 78 C 42 80 34 74 28 72 C 20 70 14 62 10 52 C 8 42 10 34 12 30 Z',
+        d: 'M 14 20 C 28 18 45 18 60 20 C 68 22 76 26 84 24 C 88 28 86 36 82 42 C 80 48 78 56 76 64 C 77 72 78 80 77 84 C 73 84 72 78 68 76 C 62 74 54 75 48 78 C 42 82 34 76 28 72 C 20 70 16 64 14 54 C 12 44 12 30 14 20 Z M 76 72 C 78 76 80 82 78 86 C 75 86 74 80 73 75 Z',
       },
-      // Florida Panhandle
+      // Alaska
       {
-        id: 'florida',
-        name: 'Floride',
-        d: 'M 74 68 C 78 72 82 78 80 86 C 76 86 74 80 72 74 Z',
+        id: 'alaska',
+        name: 'Alaska',
+        d: 'M 6 12 C 12 10 16 12 18 18 C 16 24 12 26 8 24 C 5 20 4 15 6 12 Z',
+      },
+      // Hawaï
+      {
+        id: 'hawaii',
+        name: 'Hawaï',
+        d: 'M 22 84 C 24 83 25 85 24 87 C 22 87 21 85 22 84 Z M 26 87 C 28 86 29 88 28 90 C 26 90 25 88 26 87 Z',
       },
     ],
-    decorativePaths: ['M 14 46 Q 36 48 62 36 Q 72 40 80 38'],
+    decorativePaths: [
+      // Mississippi / Missouri
+      'M 52 24 C 54 36 56 48 54 62 C 52 70 50 76 52 78',
+      // Fleuve Colorado / Grand Canyon
+      'M 26 50 C 24 58 22 64 20 68',
+      // Grands Lacs
+      'M 58 24 C 64 28 70 30 76 28',
+    ],
   },
   canada: {
     id: 'canada',
@@ -352,23 +403,28 @@ export const COUNTRY_MAPS: Record<string, MapData> = {
       {
         id: 'canada_main',
         name: 'Canada',
-        d: 'M 14 36 C 30 24 60 22 84 26 C 90 34 88 46 86 58 C 82 66 74 74 62 76 C 46 76 30 74 18 72 C 12 62 10 48 14 36 Z',
+        d: 'M 14 36 C 28 24 50 20 72 22 C 84 26 88 36 86 48 C 84 58 80 66 74 72 C 62 74 46 75 28 74 C 18 73 14 62 12 50 C 11 42 12 38 14 36 Z M 36 12 C 48 10 60 12 66 18 C 64 24 56 26 46 24 C 38 22 34 16 36 12 Z',
       },
     ],
-    decorativePaths: ['M 20 58 Q 42 54 64 70 Q 72 62 78 54'],
+    decorativePaths: [
+      // Baie d'Hudson
+      'M 48 30 C 56 32 62 38 60 48 C 56 54 48 54 44 48 C 42 40 44 32 48 30',
+      // Fleuve Saint-Laurent
+      'M 68 68 C 74 64 80 58 86 52',
+    ],
   },
   japan: {
     id: 'japan',
-    name: 'Archipel Japonais',
+    name: 'Archipel du Japon',
     viewBox: '0 0 100 100',
     features: [
-      // Hokkaido (North)
+      // Hokkaido
       {
         id: 'hokkaido',
         name: 'Hokkaido',
         d: 'M 70 12 C 78 10 84 14 82 22 C 78 26 72 24 68 18 Z',
       },
-      // Honshu (Main Island)
+      // Honshu
       {
         id: 'honshu',
         name: 'Honshu',
@@ -380,14 +436,17 @@ export const COUNTRY_MAPS: Record<string, MapData> = {
         name: 'Shikoku',
         d: 'M 40 60 C 46 58 48 62 44 66 C 40 68 38 64 40 60 Z',
       },
-      // Kyushu (South-West)
+      // Kyushu
       {
         id: 'kyushu',
         name: 'Kyushu',
         d: 'M 24 64 C 28 62 30 68 28 74 C 24 76 22 70 24 64 Z',
       },
     ],
-    decorativePaths: ['M 75 18 Q 63 47 62 45 Q 46 52 44 55 Q 26 64 26 64'],
+    decorativePaths: [
+      // Arc tectonique & Mont Fuji
+      'M 72 24 C 68 36 60 46 50 54 C 42 60 34 66 26 72',
+    ],
   },
   brazil: {
     id: 'brazil',
@@ -397,30 +456,39 @@ export const COUNTRY_MAPS: Record<string, MapData> = {
       {
         id: 'brazil_main',
         name: 'Brésil',
-        d: 'M 30 16 C 50 12 70 14 84 18 C 92 28 88 42 82 56 C 76 68 68 76 58 78 C 48 76 42 68 36 58 C 30 48 24 38 22 28 C 24 20 26 18 30 16 Z',
+        d: 'M 28 16 C 44 14 62 14 74 18 C 84 24 88 34 82 48 C 76 60 68 70 58 74 C 48 74 42 68 36 58 C 30 48 24 38 22 28 C 24 20 26 18 28 16 Z',
       },
     ],
-    decorativePaths: ['M 82 18 Q 80 38 68 58 Q 62 50 64 67 Q 70 68 70 68'],
+    decorativePaths: [
+      // Amazone
+      'M 24 22 C 38 24 54 22 70 20',
+      // Fleuve São Francisco
+      'M 68 36 C 64 48 60 56 62 66',
+    ],
   },
   australia: {
     id: 'australia',
     name: 'Australie & Tasmanie',
     viewBox: '0 0 100 100',
     features: [
-      // Main Continent
       {
         id: 'australia_main',
-        name: 'Australie Continentale',
+        name: 'Australie',
         d: 'M 22 26 C 36 18 54 22 72 18 C 84 26 88 40 86 56 C 84 68 78 80 66 84 C 52 86 38 82 26 78 C 16 70 14 54 16 38 C 18 30 20 28 22 26 Z',
       },
-      // Tasmania
+      // Tasmanie
       {
         id: 'tasmania',
         name: 'Tasmanie',
         d: 'M 72 88 C 76 86 78 90 76 94 C 72 96 70 92 72 88 Z',
       },
     ],
-    decorativePaths: ['M 18 68 Q 58 72 72 80 Q 78 74 82 70 Q 84 52 84 52'],
+    decorativePaths: [
+      // Golfe de Carpentarie
+      'M 54 22 C 56 28 60 28 62 22',
+      // Bassin Murray-Darling
+      'M 68 56 C 66 66 62 74 56 78',
+    ],
   },
 };
 
@@ -432,7 +500,6 @@ export function getMapDataForContext(
   continentId?: string,
   countryId?: string
 ): { mapData: MapData; mapType: 'world' | 'continent' | 'country' } {
-  // If specific country is active or category is cities/capitals with countryId
   if (countryId && COUNTRY_MAPS[countryId]) {
     return {
       mapData: COUNTRY_MAPS[countryId],
@@ -440,7 +507,6 @@ export function getMapDataForContext(
     };
   }
 
-  // If continent is active or filtered
   if (continentId && CONTINENT_MAPS[continentId]) {
     return {
       mapData: CONTINENT_MAPS[continentId],
@@ -448,7 +514,6 @@ export function getMapDataForContext(
     };
   }
 
-  // Default to World Map for global / continent categories
   return {
     mapData: WORLD_MAP,
     mapType: 'world',
