@@ -6,7 +6,7 @@ import {
   City,
   Country,
 } from '@/types/geo';
-import { CONTINENTS_DATA, getAllCountries, getAllCities, getCountryById, getContinentById } from '@/data/geoDataset';
+import { CONTINENTS_DATA, getAllCountries, getCountryById, getContinentById } from '@/data/geoDataset';
 
 /**
  * Shuffles array in-place helper
