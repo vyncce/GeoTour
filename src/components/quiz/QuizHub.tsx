@@ -107,7 +107,7 @@ export const QuizHub: React.FC<QuizHubProps> = ({ onStartQuiz, onOpenStats }) =>
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`p-4 rounded-2xl border text-left transition-all duration-200 min-h-[44px] flex flex-col justify-between ${
+                className={`p-4 rounded-2xl border text-left transition-all duration-200 min-h-11 flex flex-col justify-between ${
                   isSelected
                     ? 'bg-emerald-500/10 border-emerald-500 text-slate-900 dark:text-slate-100 ring-2 ring-emerald-500/30 shadow-md'
                     : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'
@@ -170,7 +170,7 @@ export const QuizHub: React.FC<QuizHubProps> = ({ onStartQuiz, onOpenStats }) =>
                 setSelectedContinent(e.target.value);
                 setSelectedCountry('');
               }}
-              className="w-full min-h-[44px] px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              className="w-full min-h-11 px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
             >
               <option value="">Tous les Continents</option>
               {CONTINENTS_DATA.map((cont) => (
@@ -189,7 +189,7 @@ export const QuizHub: React.FC<QuizHubProps> = ({ onStartQuiz, onOpenStats }) =>
             <select
               value={selectedCountry}
               onChange={(e) => setSelectedCountry(e.target.value)}
-              className="w-full min-h-[44px] px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              className="w-full min-h-11 px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
             >
               <option value="">Tous les Pays (Global)</option>
               {countriesList
@@ -210,7 +210,7 @@ export const QuizHub: React.FC<QuizHubProps> = ({ onStartQuiz, onOpenStats }) =>
             <select
               value={questionCount}
               onChange={(e) => setQuestionCount(Number(e.target.value))}
-              className="w-full min-h-[44px] px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              className="w-full min-h-11 px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
             >
               <option value={5}>5 Questions (Rapide)</option>
               <option value={10}>10 Questions (Standard)</option>

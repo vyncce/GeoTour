@@ -196,7 +196,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ config, onCompleteQuiz, 
                 type="button"
                 disabled={isAnswered}
                 onClick={() => handleSelectOption(idx)}
-                className={`flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 min-h-[44px] text-left text-sm font-medium ${optionStyle}`}
+                className={`flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 min-h-11 text-left text-sm font-medium ${optionStyle}`}
               >
                 <span>{option}</span>
                 {isAnswered && isCorrectOption && (

@@ -26,7 +26,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, activeTab, onTabCha
               key={item.id}
               onClick={() => onTabChange(item.id)}
               className={cn(
-                'flex flex-1 flex-col items-center justify-center min-h-[44px] py-1 px-2 rounded-xl transition-all duration-200 select-none relative',
+                'flex flex-1 flex-col items-center justify-center min-h-11 py-1 px-2 rounded-xl transition-all duration-200 select-none relative',
                 isActive
                   ? 'text-emerald-600 dark:text-emerald-400 font-semibold'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'

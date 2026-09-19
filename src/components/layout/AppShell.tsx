@@ -44,7 +44,7 @@ export const AppShell: React.FC<AppShellProps> = ({
                   key={item.id}
                   onClick={() => onTabChange(item.id)}
                   className={cn(
-                    'w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 min-h-[44px]',
+                    'w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 min-h-11',
                     isActive
                       ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20'
                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-100'

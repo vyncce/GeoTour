@@ -77,7 +77,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
               </div>
               <button
                 onClick={() => onUpdatePreferences({ compactMode: !preferences.compactMode })}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors min-h-[44px] px-1 ${
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors min-h-11 px-1 ${
                   preferences.compactMode ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
               >
@@ -100,7 +100,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 onClick={() =>
                   onUpdatePreferences({ notificationsEnabled: !preferences.notificationsEnabled })
                 }
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors min-h-[44px] px-1 ${
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors min-h-11 px-1 ${
                   preferences.notificationsEnabled
                     ? 'bg-emerald-600'
                     : 'bg-slate-300 dark:bg-slate-700'
