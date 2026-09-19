@@ -147,7 +147,7 @@ export const QuizHub: React.FC<QuizHubProps> = ({ onStartQuiz, onOpenStats }) =>
                   key={lvl}
                   type="button"
                   onClick={() => setDifficulty(lvl)}
-                  className={`min-h-[38px] py-1 text-xs font-semibold rounded-lg capitalize transition-all ${
+                  className={`min-h-9.5 py-1 text-xs font-semibold rounded-lg capitalize transition-all ${
                     difficulty === lvl
                       ? 'bg-emerald-600 text-white shadow-sm'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'

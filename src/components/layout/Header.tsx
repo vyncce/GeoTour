@@ -38,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Action controls & Theme toggle */}
         <div className="flex items-center gap-2">
           {actions}
-          <div className="h-5 w-[1px] bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block" />
+          <div className="h-5 w-px bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block" />
           <ThemeToggle />
         </div>
       </div>
