@@ -492,26 +492,26 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
           <span className="sm:hidden">Molette : Déplacer</span>
         </div>
 
-        {/* Floating Active Sticker Instruction Banner */}
+        {/* Floating Active Sticker Instruction Banner (Placed at the bottom dark zone of the map) */}
         {activeSticker && !isGameFinished && (
-          <div className="absolute top-14 left-4 z-20 max-w-sm bg-slate-900/90 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-emerald-500/40 shadow-lg animate-in slide-in-from-top-2 duration-200">
+          <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-20 max-w-[calc(100%-24px)] sm:max-w-sm bg-slate-900/90 backdrop-blur-md px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl border border-emerald-500/40 shadow-xl animate-in slide-in-from-bottom-2 duration-200">
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">{activeSticker.flag}</span>
-                <div>
-                  <p className="text-[11px] text-emerald-400 font-bold uppercase tracking-wide">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="text-2xl shrink-0">{activeSticker.flag}</span>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-[11px] text-emerald-400 font-bold uppercase tracking-wide truncate">
                     Où se trouve {activeSticker.type === 'capital' ? 'la capitale' : 'le pays'} ?
                   </p>
-                  <p className="text-sm font-extrabold text-white">{activeSticker.label}</p>
+                  <p className="text-xs sm:text-sm font-extrabold text-white truncate">{activeSticker.label}</p>
                 </div>
               </div>
               <button
                 onClick={handleUseHint}
-                className="p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-bold flex items-center gap-1 transition"
+                className="p-1.5 sm:p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-bold flex items-center gap-1 shrink-0 transition"
                 title="Obtenir un indice (-25 pts)"
               >
                 <Lightbulb className="h-3.5 w-3.5" />
-                Indice
+                <span className="text-[11px]">Indice</span>
               </button>
             </div>
           </div>
@@ -520,7 +520,7 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
         {/* Live Feedback Overlay Toast */}
         {feedback.message && (
           <div
-            className={`absolute bottom-4 left-1/2 -translate-x-1/2 z-30 px-5 py-2.5 rounded-2xl shadow-2xl border text-xs sm:text-sm font-bold flex items-center gap-2 max-w-md text-center backdrop-blur-lg animate-in fade-in zoom-in duration-200 ${
+            className={`absolute top-4 left-1/2 -translate-x-1/2 z-30 px-5 py-2.5 rounded-2xl shadow-2xl border text-xs sm:text-sm font-bold flex items-center gap-2 max-w-md text-center backdrop-blur-lg animate-in fade-in zoom-in duration-200 ${
               feedback.type === 'success'
                 ? 'bg-emerald-950/90 text-emerald-200 border-emerald-500/50 shadow-emerald-500/20'
                 : feedback.type === 'error'
