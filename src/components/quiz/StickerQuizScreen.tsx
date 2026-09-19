@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { StickerItem, StickerTarget, StickerQuizType, StickerQuizScope, QuizSessionResult } from '@/types/geo';
 import { CONTINENTS_DATA } from '@/data/geoDataset';
 import { generateStickerQuiz, calculateHaversineDistance, getCompassDirection, StickerQuizSession } from '@/lib/stickerQuizEngine';
 import { soundFx } from '@/lib/soundEffects';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import {
@@ -20,6 +21,7 @@ import {
   ZoomOut,
   Flame,
   ArrowLeft,
+  Move,
 } from 'lucide-react';
 
 export interface StickerQuizScreenProps {
@@ -61,12 +63,19 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
 
   const [activeHintTargetId, setActiveHintTargetId] = useState<string | null>(null);
 
+  // Zoom and Middle-Mouse Pan State
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [panOffset, setPanOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState<boolean>(false);
+  const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const mapContainerRef = useRef<HTMLDivElement>(null);
 
   const [timerSeconds, setTimerSeconds] = useState<number>(0);
   const [isGameFinished, setIsGameFinished] = useState<boolean>(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Adaptive scale of targets / pins inversely proportional to zoom
+  const targetScale = Math.max(0.4, 1 / Math.sqrt(zoomLevel));
 
   // Initialize or reset game session with D3 Natural Earth vector cartography
   const initSession = () => {
@@ -125,6 +134,59 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
 
   const placedCount = stickers.length - unplacedStickers.length;
   const progressPercent = stickers.length > 0 ? Math.round((placedCount / stickers.length) * 100) : 0;
+
+  // Middle mouse button panning
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button === 1) {
+      // Middle mouse button pressed
+      e.preventDefault();
+      setIsPanning(true);
+      dragStartRef.current = { x: e.clientX, y: e.clientY };
+    }
+  };
+
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isPanning) return;
+      e.preventDefault();
+      const dx = (e.clientX - dragStartRef.current.x) / zoomLevel;
+      const dy = (e.clientY - dragStartRef.current.y) / zoomLevel;
+      dragStartRef.current = { x: e.clientX, y: e.clientY };
+      setPanOffset((prev) => ({
+        x: prev.x + dx,
+        y: prev.y + dy,
+      }));
+    },
+    [isPanning, zoomLevel]
+  );
+
+  const handleMouseUp = useCallback((e: MouseEvent) => {
+    if (e.button === 1 || isPanning) {
+      setIsPanning(false);
+    }
+  }, [isPanning]);
+
+  // Mouse wheel zoom
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    if (e.deltaY < 0) {
+      setZoomLevel((z) => Math.min(3.5, z + 0.15));
+    } else {
+      setZoomLevel((z) => Math.max(1, z - 0.15));
+    }
+  };
+
+  // Window listeners for smooth pan release
+  useEffect(() => {
+    if (isPanning) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isPanning, handleMouseMove, handleMouseUp]);
 
   // Select a sticker from tray
   const handleSelectSticker = (stickerId: string) => {
@@ -383,20 +445,28 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
         </div>
       </div>
 
-      {/* 4. Interactive Map Container */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-800/90 bg-slate-950 shadow-xl min-h-[380px] sm:min-h-[460px]">
+      {/* 4. Interactive Map Container with Middle-Mouse Pan & Zoom */}
+      <div
+        ref={mapContainerRef}
+        onMouseDown={handleMouseDown}
+        onWheel={handleWheel}
+        className={cn(
+          'relative overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-800/90 bg-slate-950 shadow-xl min-h-[380px] sm:min-h-[460px] select-none',
+          isPanning ? 'cursor-grabbing' : 'cursor-default'
+        )}
+      >
         {/* Floating Zoom & Pan Controls */}
         <div className="absolute top-4 right-4 z-20 flex flex-col gap-1.5 bg-slate-900/80 backdrop-blur-md p-1.5 rounded-2xl border border-slate-700/60 shadow-lg">
           <button
-            onClick={() => setZoomLevel((z) => Math.min(2.5, z + 0.25))}
-            className="p-2 min-h-11 min-w-11 flex items-center justify-center rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition"
+            onClick={() => setZoomLevel((z) => Math.min(3.5, z + 0.3))}
+            className="p-2 min-h-10 min-w-10 flex items-center justify-center rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition"
             title="Zoom Avant"
           >
             <ZoomIn className="h-4 w-4" />
           </button>
           <button
-            onClick={() => setZoomLevel((z) => Math.max(1, z - 0.25))}
-            className="p-2 min-h-11 min-w-11 flex items-center justify-center rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition"
+            onClick={() => setZoomLevel((z) => Math.max(1, z - 0.3))}
+            className="p-2 min-h-10 min-w-10 flex items-center justify-center rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition"
             title="Zoom Arrière"
           >
             <ZoomOut className="h-4 w-4" />
@@ -406,16 +476,23 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
               setZoomLevel(1);
               setPanOffset({ x: 0, y: 0 });
             }}
-            className="p-2 min-h-11 min-w-11 flex items-center justify-center rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition text-[10px] font-bold"
+            className="p-2 min-h-10 min-w-10 flex items-center justify-center rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition text-[10px] font-bold"
             title="Réinitialiser la vue"
           >
             1x
           </button>
         </div>
 
+        {/* Pan Helper Badge */}
+        <div className="absolute top-4 left-4 z-20 flex items-center gap-2 p-1.5 px-2.5 rounded-2xl bg-slate-900/80 backdrop-blur-md border border-slate-700/60 text-slate-400 text-[10px] pointer-events-none shadow-md">
+          <Move className="w-3.5 h-3.5 text-emerald-400" />
+          <span className="hidden sm:inline">Clic molette enfoncé + glisser pour déplacer</span>
+          <span className="sm:hidden">Molette : Déplacer</span>
+        </div>
+
         {/* Floating Active Sticker Instruction Banner */}
         {activeSticker && !isGameFinished && (
-          <div className="absolute top-4 left-4 z-20 max-w-sm bg-slate-900/90 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-emerald-500/40 shadow-lg animate-in slide-in-from-top-2 duration-200">
+          <div className="absolute top-14 left-4 z-20 max-w-sm bg-slate-900/90 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-emerald-500/40 shadow-lg animate-in slide-in-from-top-2 duration-200">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <span className="text-2xl">{activeSticker.flag}</span>
@@ -460,7 +537,7 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
         <div className="w-full h-full flex items-center justify-center p-2 sm:p-4 overflow-hidden select-none">
           <svg
             viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
-            className="w-full h-auto max-h-[500px] transition-transform duration-300 ease-out"
+            className="w-full h-auto max-h-[500px] transition-transform duration-100 ease-out"
             style={{
               transform: `scale(${zoomLevel}) translate(${panOffset.x}px, ${panOffset.y}px)`,
               transformOrigin: 'center center',
@@ -510,7 +587,7 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
               ))}
             </g>
 
-            {/* TARGET PINS ON MAP */}
+            {/* TARGET PINS ON MAP (Counter-scaled with zoom) */}
             {targets.map((target) => {
               const isPlaced = !!target.placedSticker;
               const isHinted = activeHintTargetId === target.id;
@@ -518,7 +595,7 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
               return (
                 <g
                   key={target.id}
-                  transform={`translate(${target.svgCoords.x}, ${target.svgCoords.y})`}
+                  transform={`translate(${target.svgCoords.x}, ${target.svgCoords.y}) scale(${targetScale})`}
                   onClick={() => handleTargetClick(target)}
                   className="cursor-pointer group select-none"
                 >
