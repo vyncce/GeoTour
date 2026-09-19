@@ -1,36 +1,6 @@
 import { CONTINENTS_DATA, getAllCountries } from '@/data/geoDataset';
 import { StickerItem, StickerTarget, StickerQuizType, StickerQuizScope } from '@/types/geo';
-import { createProjector, BoundingBox } from '@/lib/geoProjection';
-
-/**
- * Continent Bounding Boxes for Focused Map Projections
- */
-export const CONTINENT_BOUNDS: Record<string, BoundingBox> = {
-  europe: [
-    [-15, 34],
-    [42, 71],
-  ],
-  asia: [
-    [26, -11],
-    [146, 56],
-  ],
-  africa: [
-    [-20, -36],
-    [55, 38],
-  ],
-  north_america: [
-    [-170, 7],
-    [-52, 72],
-  ],
-  south_america: [
-    [-84, -56],
-    [-34, 13],
-  ],
-  oceania: [
-    [110, -48],
-    [180, 2],
-  ],
-};
+import { generateWorldMapPaths, generateContinentMapPaths } from '@/lib/d3GeoService';
 
 /**
  * Calculate Great-Circle Distance between two GPS points using Haversine formula (in km)
@@ -95,20 +65,23 @@ function shuffle<T>(array: T[]): T[] {
 export interface StickerQuizSession {
   stickers: StickerItem[];
   targets: StickerTarget[];
-  projector: (pos: [number, number]) => [number, number];
-  bounds?: BoundingBox;
+  projector: (lng: number, lat: number) => [number, number];
+  graticulePath: string;
+  spherePath?: string;
+  landPath?: string;
+  countryPaths: { id: string; name: string; d: string }[];
 }
 
 /**
- * Generate a new Sticker Quiz session with accurate coordinates and targets
+ * Generate a new Sticker Quiz session with accurate coordinates and Natural Earth D3 targets
  */
 export function generateStickerQuiz(
   scope: StickerQuizScope,
   continentId: string = 'europe',
   quizType: StickerQuizType = 'countries',
   stickerCount: number = 8,
-  svgWidth: number = 900,
-  svgHeight: number = 540
+  svgWidth: number = 920,
+  svgHeight: number = 520
 ): StickerQuizSession {
   let sourceCountries = getAllCountries();
 
@@ -127,16 +100,21 @@ export function generateStickerQuiz(
     );
   });
 
-  const selectedCountries = shuffle(eligibleCountries).slice(0, Math.min(stickerCount, eligibleCountries.length));
+  const selectedCountries = shuffle(eligibleCountries).slice(
+    0,
+    Math.min(stickerCount, eligibleCountries.length)
+  );
 
-  // Determine Projector
-  const bounds = scope === 'continent' ? CONTINENT_BOUNDS[continentId] : undefined;
-  const { project } = createProjector({
-    width: svgWidth,
-    height: svgHeight,
-    padding: scope === 'continent' ? 45 : 30,
-    bounds,
-  });
+  // Generate D3-geo Map paths and Projector
+  let mapResult: ReturnType<typeof generateWorldMapPaths> | ReturnType<typeof generateContinentMapPaths>;
+
+  if (scope === 'continent') {
+    const continentObj = CONTINENTS_DATA.find((c) => c.id === continentId);
+    const countryIds = continentObj ? continentObj.countries.map((c) => c.id) : [];
+    mapResult = generateContinentMapPaths(countryIds, svgWidth, svgHeight, 45);
+  } else {
+    mapResult = generateWorldMapPaths(svgWidth, svgHeight);
+  }
 
   const stickers: StickerItem[] = [];
   const targets: StickerTarget[] = [];
@@ -159,7 +137,7 @@ export function generateStickerQuiz(
     const stickerId = `sticker_${country.id}_${itemType}_${index}`;
     const targetId = `target_${country.id}_${itemType}_${index}`;
 
-    const [px, py] = project([coords.lng, coords.lat]);
+    const [px, py] = mapResult.project(coords.lng, coords.lat);
 
     const sticker: StickerItem = {
       id: stickerId,
@@ -192,7 +170,10 @@ export function generateStickerQuiz(
   return {
     stickers: shuffle(stickers),
     targets,
-    projector: project,
-    bounds,
+    projector: mapResult.project,
+    graticulePath: mapResult.graticulePath,
+    spherePath: 'spherePath' in mapResult ? mapResult.spherePath : undefined,
+    landPath: 'landPath' in mapResult ? mapResult.landPath : undefined,
+    countryPaths: mapResult.countryPaths,
   };
 }

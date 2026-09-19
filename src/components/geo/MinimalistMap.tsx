@@ -4,9 +4,12 @@ import React, { useMemo } from 'react';
 import { GeoPoint } from '@/types/geo';
 import { cn } from '@/lib/utils';
 import { Star, MapPin, Compass, Navigation } from 'lucide-react';
-import { getMapDataForContext } from '@/data/vectorMaps';
-import { COUNTRY_GEOMETRIES } from '@/data/geoJsonData';
-import { computeBoundingBox, createProjector } from '@/lib/geoProjection';
+import {
+  generateSingleCountryMap,
+  generateContinentMapPaths,
+  generateWorldMapPaths,
+} from '@/lib/d3GeoService';
+import { CONTINENTS_DATA } from '@/data/geoDataset';
 
 export interface MapMarker {
   id: string;
@@ -34,6 +37,9 @@ export interface MinimalistMapProps {
   className?: string;
 }
 
+const MAP_WIDTH = 800;
+const MAP_HEIGHT = 500;
+
 export const MinimalistMap: React.FC<MinimalistMapProps> = ({
   category,
   continentId,
@@ -48,80 +54,46 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
   highlightCountryName,
   className,
 }) => {
-  // Check if we have real GeoJSON geometry for current country or compute bounding geometry
-  const geoJsonGeometry = useMemo(() => {
-    if (countryId && COUNTRY_GEOMETRIES[countryId]) {
-      return COUNTRY_GEOMETRIES[countryId];
-    }
+  // 1. Single Country Natural Earth Cartography
+  const countryMap = useMemo(() => {
+    if (!countryId) return null;
+    return generateSingleCountryMap(countryId, MAP_WIDTH, MAP_HEIGHT, 45);
+  }, [countryId]);
 
-    // Fallback: If country has markers with GPS coordinates, generate smooth bounding geometry
-    if (countryId && markers.length > 0) {
-      const validPoints = markers
-        .filter((m) => m.coords.lat !== undefined && m.coords.lng !== undefined)
-        .map((m) => [m.coords.lng!, m.coords.lat!] as [number, number]);
+  // 2. Continent Natural Earth Cartography
+  const continentMap = useMemo(() => {
+    if (countryId || !continentId) return null;
+    const continentObj = CONTINENTS_DATA.find((c) => c.id === continentId);
+    const countryIds = continentObj ? continentObj.countries.map((c) => c.id) : [];
+    return generateContinentMapPaths(countryIds, MAP_WIDTH, MAP_HEIGHT, 35);
+  }, [countryId, continentId]);
 
-      if (validPoints.length >= 2) {
-        let minLng = Math.min(...validPoints.map((p) => p[0]));
-        let maxLng = Math.max(...validPoints.map((p) => p[0]));
-        let minLat = Math.min(...validPoints.map((p) => p[1]));
-        let maxLat = Math.max(...validPoints.map((p) => p[1]));
+  // 3. World Natural Earth Cartography (Default / Global)
+  const worldMap = useMemo(() => {
+    if (countryId || continentId) return null;
+    return generateWorldMapPaths(MAP_WIDTH, MAP_HEIGHT);
+  }, [countryId, continentId]);
 
-        const padLng = Math.max(0.6, (maxLng - minLng) * 0.3);
-        const padLat = Math.max(0.6, (maxLat - minLat) * 0.3);
-
-        return {
-          type: 'Polygon',
-          coordinates: [
-            [
-              [minLng - padLng, minLat - padLat],
-              [maxLng + padLng, minLat - padLat],
-              [maxLng + padLng, maxLat + padLat],
-              [minLng - padLng, maxLat + padLat],
-              [minLng - padLng, minLat - padLat],
-            ],
-          ],
-        };
-      }
-    }
-
-    return null;
-  }, [countryId, markers]);
-
-  // Compute dynamic cartographic projection when GeoJSON is available
-  const cartoProjection = useMemo(() => {
-    if (!geoJsonGeometry) return null;
-
-    const width = 800;
-    const height = 500;
-    const bounds = computeBoundingBox(geoJsonGeometry as any);
-    const projector = createProjector({ width, height, padding: 40, bounds });
-    const pathD = projector.svgPath(geoJsonGeometry as any);
-
-    return {
-      width,
-      height,
-      viewBox: `0 0 ${width} ${height}`,
-      pathD,
-      project: projector.project,
-    };
-  }, [geoJsonGeometry]);
-
-  // Fallback / standard vector maps for continents & world
-  const { mapData, mapType } = useMemo(
-    () => getMapDataForContext(category, continentId, countryId),
-    [category, continentId, countryId]
-  );
+  // Unified projector function
+  const projectPoint = useMemo(() => {
+    if (countryMap) return countryMap.project;
+    if (continentMap) return continentMap.project;
+    if (worldMap) return worldMap.project;
+    return (lng: number, lat: number): [number, number] => [
+      ((lng + 180) / 360) * MAP_WIDTH,
+      ((90 - lat) / 180) * MAP_HEIGHT,
+    ];
+  }, [countryMap, continentMap, worldMap]);
 
   // Helper to get screen percentage coordinates for any marker
   const getMarkerPosition = (coords: GeoPoint): { left: string; top: string } => {
-    if (cartoProjection && coords.lat !== undefined && coords.lng !== undefined) {
-      const [px, py] = cartoProjection.project([coords.lng, coords.lat]);
+    if (coords.lat !== undefined && coords.lng !== undefined) {
+      const [px, py] = projectPoint(coords.lng, coords.lat);
       return {
-        left: `${(px / cartoProjection.width) * 100}%`,
-        top: `${(py / cartoProjection.height) * 100}%`,
+        left: `${(px / MAP_WIDTH) * 100}%`,
+        top: `${(py / MAP_HEIGHT) * 100}%`,
       };
     }
-    // Fallback to normalized percentage coordinates
     return {
       left: `${coords.x}%`,
       top: `${coords.y}%`,
@@ -164,13 +136,7 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
             <stop offset="100%" stopColor="#020617" stopOpacity="1" />
           </radialGradient>
 
-          {/* Landmass Shading Gradient */}
-          <linearGradient id="land-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#1e293b" />
-            <stop offset="100%" stopColor="#0f172a" />
-          </linearGradient>
-
-          {/* Target Country Glow Filter */}
+          {/* Target Glow Filter */}
           <filter id="glow-target" x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur stdDeviation="3" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
@@ -181,195 +147,209 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
         <rect width="100%" height="100%" fill="url(#carto-graticule)" />
       </svg>
 
-      {/* Dynamic Realistic Vector Map Rendering */}
-      {cartoProjection ? (
-        // 1. High-Precision Cartographic GeoJSON Render
+      {/* 1. SINGLE COUNTRY NATURAL EARTH VIEW */}
+      {countryMap && (
         <svg
-          viewBox={cartoProjection.viewBox}
+          viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
           className="absolute inset-0 w-full h-full transition-all duration-700 ease-out"
           preserveAspectRatio="xMidYMid meet"
         >
-          {/* Ocean Shoreline Halo */}
+          {/* Shoreline Halo */}
           <path
-            d={cartoProjection.pathD}
+            d={countryMap.svgPath}
             fill="none"
             stroke="currentColor"
-            strokeWidth="4"
+            strokeWidth="5"
             strokeLinejoin="round"
             strokeLinecap="round"
-            className="text-emerald-500/15 pointer-events-none"
+            className="text-emerald-500/20 pointer-events-none"
           />
 
-          {/* Real Landmass Shape */}
+          {/* Authentic Country Polygon */}
           <path
-            d={cartoProjection.pathD}
+            d={countryMap.svgPath}
             filter="url(#glow-target)"
-            className="fill-slate-800/95 stroke-emerald-400/80 stroke-2 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all duration-300"
+            className="fill-slate-850/95 stroke-emerald-400 stroke-2 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all duration-300"
           />
         </svg>
-      ) : (
-        // 2. Standard Context Map (Continents / World Planisphere)
+      )}
+
+      {/* 2. CONTINENT NATURAL EARTH VIEW */}
+      {continentMap && (
         <svg
-          viewBox={mapData.viewBox}
+          viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
           className="absolute inset-0 w-full h-full transition-all duration-700 ease-out"
           preserveAspectRatio="xMidYMid meet"
         >
-          {/* Ocean Halo / Shoreline Contour Effect */}
-          {mapData.features.map((feature) => (
-            <path
-              key={`halo-${feature.id}`}
-              d={feature.d}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="3.5"
-              strokeLinejoin="round"
-              strokeLinecap="round"
-              className="text-emerald-500/10 pointer-events-none"
-            />
-          ))}
+          {/* Graticule Grid */}
+          <path
+            d={continentMap.graticulePath}
+            fill="none"
+            stroke="#334155"
+            strokeWidth="0.6"
+            strokeDasharray="3 3"
+            opacity="0.3"
+          />
 
-          {/* Decorative Hydrography & River Accents */}
-          {mapData.decorativePaths?.map((pathD, idx) => (
-            <path
-              key={`dec-${idx}`}
-              d={pathD}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="0.8"
-              strokeDasharray="2.5 2.5"
-              strokeLinecap="round"
-              className="text-sky-400/40 pointer-events-none transition-opacity duration-300"
-            />
-          ))}
-
-          {/* Realistic Geographic Landmass Features */}
-          {mapData.features.map((feature) => {
+          {/* Continent Country Features */}
+          {continentMap.countryPaths.map((c) => {
             const isTarget =
-              targetId === feature.id ||
-              (targetName && feature.name.toLowerCase().includes(targetName.toLowerCase()));
+              targetId === c.id ||
+              (targetName && c.name.toLowerCase().includes(targetName.toLowerCase()));
 
             return (
-              <g key={feature.id} className="transition-all duration-300 group">
-                <path
-                  d={feature.d}
-                  filter={isTarget ? 'url(#glow-target)' : undefined}
-                  className={cn(
-                    'transition-all duration-300 cursor-default stroke-linejoin-round',
-                    isTarget
-                      ? 'fill-emerald-500/35 stroke-emerald-400 stroke-2 drop-shadow-[0_0_12px_rgba(16,185,129,0.6)]'
-                      : 'fill-slate-800/90 hover:fill-slate-700/90 stroke-slate-600/70 hover:stroke-emerald-500/60 stroke-[1.2]'
-                  )}
-                />
-              </g>
+              <path
+                key={c.id}
+                d={c.d}
+                className={cn(
+                  'transition-all duration-300',
+                  isTarget
+                    ? 'fill-emerald-600/50 stroke-emerald-400 stroke-2 drop-shadow-[0_0_10px_rgba(16,185,129,0.5)]'
+                    : 'fill-slate-800/90 stroke-slate-700/80 stroke-1 hover:fill-slate-750'
+                )}
+              />
             );
           })}
         </svg>
       )}
 
-      {/* Target Crosshair Pulse Indicator */}
+      {/* 3. WORLD NATURAL EARTH 1 VIEW */}
+      {worldMap && (
+        <svg
+          viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
+          className="absolute inset-0 w-full h-full transition-all duration-700 ease-out"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          {/* Sphere Outline */}
+          <path d={worldMap.spherePath} fill="none" stroke="#1e293b" strokeWidth="1.5" />
+
+          {/* Graticule Lines */}
+          <path
+            d={worldMap.graticulePath}
+            fill="none"
+            stroke="#334155"
+            strokeWidth="0.6"
+            strokeDasharray="2 4"
+            opacity="0.4"
+          />
+
+          {/* World Countries */}
+          {worldMap.countryPaths.map((c) => (
+            <path
+              key={c.id}
+              d={c.d}
+              className="fill-slate-800/90 stroke-slate-700/70 stroke-0.8 hover:fill-slate-750 transition-colors"
+            />
+          ))}
+        </svg>
+      )}
+
+      {/* Active Target Indicator Pulse Ring */}
       {currentTargetPos && (
         <div
-          className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10 transition-all duration-500"
-          style={currentTargetPos}
+          className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10 transition-all duration-500 ease-out"
+          style={{ left: currentTargetPos.left, top: currentTargetPos.top }}
         >
-          <span className="relative flex h-10 w-10 items-center justify-center">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-7 w-7 bg-emerald-500/25 border-2 border-emerald-400 items-center justify-center shadow-lg shadow-emerald-500/50">
-              <span className="h-2 w-2 rounded-full bg-emerald-300" />
-            </span>
-          </span>
+          <div className="relative flex items-center justify-center">
+            <span className="animate-ping absolute inline-flex h-12 w-12 rounded-full bg-emerald-400 opacity-60" />
+            <span className="relative inline-flex rounded-full h-6 w-6 bg-linear-to-tr from-emerald-600 to-teal-400 border-2 border-white shadow-lg shadow-emerald-500/50" />
+          </div>
         </div>
       )}
 
-      {/* Cartographic Compass Rose & Information Overlay */}
-      <div className="absolute top-3 left-3 z-20 flex items-center gap-2">
-        <div className="px-3 py-1.5 rounded-xl bg-slate-900/90 backdrop-blur-md border border-slate-700/80 text-xs font-bold text-emerald-400 tracking-wider uppercase flex items-center gap-1.5 shadow-lg">
-          <Compass className="h-4 w-4 text-emerald-400 animate-spin-slow" />
-          <span>{highlightCountryName || mapData.name}</span>
-        </div>
-        <div className="hidden sm:inline-flex px-2.5 py-1 rounded-lg bg-slate-950/80 backdrop-blur-md border border-slate-800 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
-          {cartoProjection
-            ? 'Projection GPS WGS84'
-            : mapType === 'country'
-            ? 'Vue Pays Réaliste'
-            : mapType === 'continent'
-            ? 'Vue Continentale'
-            : 'Planisphère'}
-        </div>
-      </div>
-
-      {/* North Indicator & Scale Widget */}
-      <div className="absolute bottom-3 right-3 z-20 flex items-center gap-2 pointer-events-none">
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/85 backdrop-blur-md border border-slate-800 text-[10px] font-mono text-slate-400 shadow-md">
-          <Navigation className="h-3 w-3 text-emerald-400 -rotate-45" />
-          <span className="font-bold text-emerald-400">N</span>
-        </div>
-        <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/85 backdrop-blur-md border border-slate-800 text-[10px] font-mono text-slate-400 shadow-md">
-          <div className="w-8 h-1 bg-emerald-500/40 border border-emerald-400 rounded-sm" />
-          <span>Échelle GPS</span>
-        </div>
-      </div>
-
-      {/* Interactive Map Markers with Precise GPS Placement */}
-      <div className="absolute inset-0 w-full h-full pointer-events-none">
+      {/* City & Location Markers */}
+      <div className="absolute inset-0 pointer-events-auto">
         {markers.map((marker) => {
-          const isTarget = activeMarkerId === marker.id;
-          const isCorrect = marker.isCorrect === true;
-          const isWrong = marker.isCorrect === false;
           const pos = getMarkerPosition(marker.coords);
+          const isCapital = marker.isCapital;
+          const isSelected = activeMarkerId === marker.id || marker.isSelected;
+          const isCorrect = marker.isCorrect;
+
+          let stateStyle = 'bg-slate-900 border-slate-400 text-slate-200';
+          let iconColor = 'text-slate-300';
+
+          if (isCapital) {
+            stateStyle = 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-amber-500/20';
+            iconColor = 'text-amber-400';
+          }
+
+          if (isSelected) {
+            stateStyle =
+              'bg-emerald-500 border-white text-white shadow-lg shadow-emerald-500/50 scale-125 z-20 ring-4 ring-emerald-500/30';
+            iconColor = 'text-white';
+          }
+
+          if (isCorrect === true) {
+            stateStyle = 'bg-emerald-600 border-emerald-300 text-white shadow-emerald-500/50 z-20';
+            iconColor = 'text-white';
+          } else if (isCorrect === false) {
+            stateStyle = 'bg-rose-600 border-rose-300 text-white shadow-rose-500/50 z-20';
+            iconColor = 'text-white';
+          }
 
           return (
             <div
               key={marker.id}
-              className="absolute -translate-x-1/2 -translate-y-1/2 z-20 group pointer-events-auto transition-all duration-500"
-              style={pos}
+              onClick={() => onMarkerClick && onMarkerClick(marker.id)}
+              className={cn(
+                'absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer group transition-all duration-300 ease-out',
+                onMarkerClick ? 'hover:scale-125' : ''
+              )}
+              style={{ left: pos.left, top: pos.top }}
             >
-              <button
-                type="button"
-                onClick={() => onMarkerClick?.(marker.id)}
+              {/* Marker Pin Button */}
+              <div
                 className={cn(
-                  'flex items-center justify-center min-w-11 min-h-11 p-2 rounded-full transition-all duration-300 focus:outline-none focus:scale-125',
-                  isTarget && 'scale-125 z-30',
-                  isCorrect && 'animate-bounce text-emerald-400 scale-125',
-                  isWrong && 'animate-pulse text-rose-500 scale-125'
+                  'flex items-center justify-center w-8 h-8 rounded-full border-2 shadow-md transition-all duration-200 backdrop-blur-xs min-h-11 min-w-11 sm:w-8 sm:h-8',
+                  stateStyle
                 )}
               >
-                <div
-                  className={cn(
-                    'flex items-center justify-center rounded-full p-2 border shadow-lg transition-all duration-200',
-                    marker.isCapital
-                      ? 'bg-amber-500/25 border-amber-400 text-amber-400 shadow-amber-500/40'
-                      : 'bg-emerald-500/25 border-emerald-400 text-emerald-400 shadow-emerald-500/30',
-                    isTarget && 'bg-teal-500/35 border-teal-300 text-teal-200 shadow-teal-500/50 scale-110',
-                    isCorrect && 'bg-emerald-500 border-white text-white shadow-emerald-500/80',
-                    isWrong && 'bg-rose-600 border-white text-white shadow-rose-600/80'
-                  )}
-                >
-                  {marker.isCapital ? (
-                    <Star className="h-4 w-4 fill-amber-400 stroke-amber-200" />
-                  ) : (
-                    <MapPin className="h-4 w-4 stroke-[2.5]" />
-                  )}
-                </div>
-              </button>
+                {isCapital ? (
+                  <Star className={cn('w-4 h-4 fill-current', iconColor)} />
+                ) : (
+                  <MapPin className={cn('w-4 h-4', iconColor)} />
+                )}
+              </div>
 
+              {/* Marker Label Tooltip */}
               {showLabels && (
                 <div
                   className={cn(
-                    'absolute top-full left-1/2 -translate-x-1/2 mt-1 px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap backdrop-blur-md pointer-events-none transition-all duration-200 border shadow-md',
-                    isTarget
-                      ? 'bg-emerald-600 text-white border-emerald-400 opacity-100 scale-105 z-30'
-                      : 'bg-slate-950/90 text-slate-200 border-slate-800 group-hover:opacity-100 group-hover:scale-105'
+                    'absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 px-2 py-0.5 rounded-md text-[11px] font-bold whitespace-nowrap shadow-md pointer-events-none transition-all duration-200',
+                    isSelected || isCorrect !== undefined
+                      ? 'opacity-100 scale-100 bg-slate-900/95 border border-slate-700 text-emerald-400'
+                      : 'opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 bg-slate-900/90 text-slate-200 border border-slate-800'
                   )}
                 >
-                  {marker.name}
-                  {marker.isCapital && <span className="ml-1 text-amber-400 font-bold">★</span>}
+                  <div className="flex items-center gap-1">
+                    {isCapital && <span className="text-amber-400">★</span>}
+                    <span>{marker.name}</span>
+                  </div>
+                  {marker.sublabel && (
+                    <span className="block text-[9px] text-slate-400 font-normal">
+                      {marker.sublabel}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
           );
         })}
       </div>
+
+      {/* Cartographic Compass Rose & Watermark */}
+      <div className="absolute top-4 right-4 flex items-center gap-2 p-2 rounded-2xl bg-slate-900/60 backdrop-blur-md border border-slate-800/60 text-slate-400 text-xs font-mono pointer-events-none shadow-lg">
+        <Compass className="w-4 h-4 text-emerald-400 animate-spin-slow" />
+        <span className="text-[10px] uppercase font-bold text-slate-300">Natural Earth WGS84</span>
+      </div>
+
+      {/* Country Name Badge Overlay */}
+      {(highlightCountryName || countryId) && (
+        <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-800 text-slate-200 text-xs font-bold pointer-events-none shadow-lg">
+          <Navigation className="w-3.5 h-3.5 text-emerald-400 fill-current" />
+          <span>{highlightCountryName || countryId?.toUpperCase()}</span>
+        </div>
+      )}
     </div>
   );
 };

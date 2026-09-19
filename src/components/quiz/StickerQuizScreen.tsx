@@ -3,16 +3,13 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { StickerItem, StickerTarget, StickerQuizType, StickerQuizScope, QuizSessionResult } from '@/types/geo';
 import { CONTINENTS_DATA } from '@/data/geoDataset';
-import { WORLD_MAP, CONTINENT_MAPS } from '@/data/vectorMaps';
-import { generateStickerQuiz, calculateHaversineDistance, getCompassDirection } from '@/lib/stickerQuizEngine';
+import { generateStickerQuiz, calculateHaversineDistance, getCompassDirection, StickerQuizSession } from '@/lib/stickerQuizEngine';
 import { soundFx } from '@/lib/soundEffects';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { Card } from '@/components/ui/Card';
 import {
   Globe,
   MapPin,
-  Sparkles,
   Trophy,
   RotateCcw,
   Compass,
@@ -21,10 +18,8 @@ import {
   Lightbulb,
   ZoomIn,
   ZoomOut,
-  Maximize2,
   Flame,
   ArrowLeft,
-  Share2,
 } from 'lucide-react';
 
 export interface StickerQuizScreenProps {
@@ -47,6 +42,7 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
   const [quizType, setQuizType] = useState<StickerQuizType>('countries');
   const [stickerCount, setStickerCount] = useState<number>(8);
 
+  const [sessionData, setSessionData] = useState<StickerQuizSession | null>(null);
   const [stickers, setStickers] = useState<StickerItem[]>([]);
   const [targets, setTargets] = useState<StickerTarget[]>([]);
   const [selectedStickerId, setSelectedStickerId] = useState<string | null>(null);
@@ -63,7 +59,6 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
     coords?: { x: number; y: number };
   }>({ type: null, message: '' });
 
-  const [hintAvailable, setHintAvailable] = useState<boolean>(true);
   const [activeHintTargetId, setActiveHintTargetId] = useState<string | null>(null);
 
   const [zoomLevel, setZoomLevel] = useState<number>(1);
@@ -73,7 +68,7 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
   const [isGameFinished, setIsGameFinished] = useState<boolean>(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Initialize or reset game session
+  // Initialize or reset game session with D3 Natural Earth vector cartography
   const initSession = () => {
     const session = generateStickerQuiz(
       scope,
@@ -84,6 +79,7 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
       SVG_HEIGHT
     );
 
+    setSessionData(session);
     setStickers(session.stickers);
     setTargets(session.targets);
     setSelectedStickerId(session.stickers[0]?.id || null);
@@ -93,7 +89,6 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
     setAttempts(0);
     setMistakes(0);
     setFeedback({ type: null, message: '' });
-    setHintAvailable(true);
     setActiveHintTargetId(null);
     setIsGameFinished(false);
     setTimerSeconds(0);
@@ -177,7 +172,7 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
 
       setActiveHintTargetId(null);
 
-      // Automatically select the next unplaced sticker
+      // Automatically select next unplaced sticker
       const nextRemaining = stickers.filter((s) => !s.isPlaced && s.id !== activeSticker.id);
       if (nextRemaining.length > 0) {
         setSelectedStickerId(nextRemaining[0].id);
@@ -229,7 +224,7 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
 
     setFeedback({
       type: 'hint',
-      message: `Indice : ${activeSticker.label} est situé au repère clignotant en jaune sur la carte !`,
+      message: `Indice : ${activeSticker.label} se situe au repère clignotant en jaune sur la carte !`,
       coords: matchingTarget.svgCoords,
     });
   };
@@ -272,14 +267,6 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
     }
   };
 
-  // Background map path
-  const mapData = useMemo(() => {
-    if (scope === 'continent') {
-      return CONTINENT_MAPS[selectedContinent] || CONTINENT_MAPS.europe || WORLD_MAP;
-    }
-    return WORLD_MAP;
-  }, [scope, selectedContinent]);
-
   return (
     <div className="space-y-4 sm:space-y-6 max-w-6xl mx-auto animate-in fade-in duration-300">
       {/* 1. Header Toolbar */}
@@ -294,11 +281,11 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
                 {scope === 'world' ? <Globe className="h-5 w-5" /> : <MapPin className="h-5 w-5" />}
               </span>
               <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-slate-100">
-                {scope === 'world' ? 'Quiz Monde : Stickers sur Planisphère' : 'Quiz Continent : Stickers Régionaux'}
+                {scope === 'world' ? 'Quiz Monde : D3 Natural Earth 50m' : 'Quiz Continent : D3 Cartographie Haute Fidélité'}
               </h2>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Sélectionnez un sticker ci-dessous puis cliquez sur le bon repère de la carte.
+              Sélectionnez un sticker ci-dessous puis touchez son repère sur la carte vectorielle.
             </p>
           </div>
         </div>
@@ -344,8 +331,8 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
           </div>
         ) : (
           <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 font-semibold px-2">
-            <Globe className="h-4 w-4 text-emerald-500" />
-            Couverture mondiale : 6 Continents
+            <Compass className="h-4 w-4 text-emerald-500" />
+            Projection Natural Earth 1 (208 Pays &amp; Territoires)
           </div>
         )}
 
@@ -469,7 +456,7 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
           </div>
         )}
 
-        {/* SVG Map Canvas */}
+        {/* SVG Map Canvas with D3-geo Natural Earth Vector Paths */}
         <div className="w-full h-full flex items-center justify-center p-2 sm:p-4 overflow-hidden select-none">
           <svg
             viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
@@ -490,46 +477,43 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
               <filter id="landGlow" x="-10%" y="-10%" width="120%" height="120%">
                 <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#0284c7" floodOpacity="0.2" />
               </filter>
-
-              {/* Target Marker Pulsing Glow */}
-              <filter id="targetPulse" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="4" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
             </defs>
 
             {/* Ocean Basin */}
             <rect width={SVG_WIDTH} height={SVG_HEIGHT} fill="url(#oceanGrad)" />
 
-            {/* Graticule Grid Lines (Equator & Prime Meridian) */}
-            <g stroke="#1e293b" strokeWidth="1" strokeDasharray="4 6" opacity="0.4">
-              <line x1="0" y1={SVG_HEIGHT / 2} x2={SVG_WIDTH} y2={SVG_HEIGHT / 2} />
-              <line x1={SVG_WIDTH / 2} y1="0" x2={SVG_WIDTH / 2} y2={SVG_HEIGHT} />
-              <line x1="0" y1={SVG_HEIGHT * 0.3} x2={SVG_WIDTH} y2={SVG_HEIGHT * 0.3} />
-              <line x1="0" y1={SVG_HEIGHT * 0.7} x2={SVG_WIDTH} y2={SVG_HEIGHT * 0.7} />
-            </g>
+            {/* Sphere Horizon (World Mode) */}
+            {sessionData?.spherePath && (
+              <path d={sessionData.spherePath} fill="none" stroke="#1e293b" strokeWidth="1.5" />
+            )}
 
-            {/* Continent / Regional Landmass Vector Silhouettes */}
+            {/* Graticule Grid Lines */}
+            {sessionData?.graticulePath && (
+              <path
+                d={sessionData.graticulePath}
+                fill="none"
+                stroke="#334155"
+                strokeWidth="0.6"
+                strokeDasharray="2 4"
+                opacity="0.4"
+              />
+            )}
+
+            {/* Natural Earth 50m Country Vector Outlines */}
             <g filter="url(#landGlow)">
-              {mapData.features.map((feature) => (
+              {sessionData?.countryPaths.map((country) => (
                 <path
-                  key={feature.id}
-                  d={feature.d}
+                  key={country.id}
+                  d={country.d}
                   className="fill-slate-800/90 stroke-slate-700/80 stroke-1 hover:fill-slate-750 transition-colors duration-200"
                 />
               ))}
             </g>
 
-            {/* Decorative Vector Paths */}
-            {mapData.decorativePaths?.map((d, i) => (
-              <path key={`dec_${i}`} d={d} stroke="#334155" strokeWidth="0.8" strokeDasharray="2 4" fill="none" opacity="0.3" />
-            ))}
-
             {/* TARGET PINS ON MAP */}
             {targets.map((target) => {
               const isPlaced = !!target.placedSticker;
               const isHinted = activeHintTargetId === target.id;
-              const isTargetForActive = activeSticker && target.stickerId === activeSticker.id;
 
               return (
                 <g
@@ -663,7 +647,7 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
           </p>
         </div>
 
-        {/* Sticker Cards Bar (Horizontal Scroll / Wrap) */}
+        {/* Sticker Cards Bar (Horizontal Grid / Wrap) */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 sm:gap-3">
           {stickers.map((sticker) => {
             const isSelected = selectedStickerId === sticker.id;
@@ -721,7 +705,7 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
                 Félicitations ! 🌍
               </h3>
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                Tous les stickers ont été placés avec succès sur la carte !
+                Tous les stickers ont été placés avec succès sur la carte Natural Earth !
               </p>
             </div>
 
