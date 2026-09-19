@@ -1,3 +1,5 @@
+import { DifficultyLevel } from '@/types/geo';
+
 export interface LocalStorageOptions<T> {
   serializer?: (value: T) => string;
   deserializer?: (value: string) => T;
@@ -11,6 +13,11 @@ export interface UserPreferences {
   compactMode: boolean;
   notificationsEnabled: boolean;
   autoSaveInterval: number; // in seconds
+  // Quiz configuration and regional filters
+  difficulty: DifficultyLevel;
+  selectedContinent: string;
+  selectedCountry: string;
+  questionCount: number;
 }
 
 export interface AppState {

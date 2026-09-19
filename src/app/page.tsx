@@ -22,6 +22,10 @@ const INITIAL_PREFERENCES: UserPreferences = {
   compactMode: false,
   notificationsEnabled: true,
   autoSaveInterval: 30,
+  difficulty: 'medium',
+  selectedContinent: '',
+  selectedCountry: '',
+  questionCount: 10,
 };
 
 const INITIAL_APP_STATE: AppState = {
@@ -108,8 +112,10 @@ export default function Home() {
       {/* 1. QUIZ HUB SCREEN */}
       {screenMode === 'hub' && (
         <QuizHub
+          preferences={preferences}
           onStartQuiz={handleStartQuiz}
           onOpenStats={() => setScreenMode('stats')}
+          onOpenSettings={() => setScreenMode('settings')}
           onOpenWorldQuiz={() => setScreenMode('quiz-world')}
           onOpenContinentQuiz={() => setScreenMode('quiz-continent')}
         />

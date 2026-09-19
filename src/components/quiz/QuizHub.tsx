@@ -4,30 +4,47 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { QuizCategory, DifficultyLevel, QuizConfig } from '@/types/geo';
-import { CONTINENTS_DATA, getAllCountries } from '@/data/geoDataset';
-import { Globe, Map, Building2, Landmark, Play, Sparkles, Layers, SlidersHorizontal } from 'lucide-react';
+import { QuizCategory, QuizConfig } from '@/types/geo';
+import { UserPreferences } from '@/types/storage';
+import { getContinentById, getCountryById } from '@/data/geoDataset';
+import {
+  Globe,
+  Map,
+  Building2,
+  Landmark,
+  Play,
+  Sparkles,
+  Layers,
+  Settings as SettingsIcon,
+  SlidersHorizontal,
+} from 'lucide-react';
 
 export interface QuizHubProps {
+  preferences?: UserPreferences;
   onStartQuiz: (config: QuizConfig) => void;
   onOpenStats: () => void;
+  onOpenSettings?: () => void;
   onOpenWorldQuiz?: () => void;
   onOpenContinentQuiz?: () => void;
 }
 
 export const QuizHub: React.FC<QuizHubProps> = ({
+  preferences,
   onStartQuiz,
   onOpenStats,
+  onOpenSettings,
   onOpenWorldQuiz,
   onOpenContinentQuiz,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<QuizCategory>('capitals');
-  const [difficulty, setDifficulty] = useState<DifficultyLevel>('medium');
-  const [selectedContinent, setSelectedContinent] = useState<string>('');
-  const [selectedCountry, setSelectedCountry] = useState<string>('');
-  const [questionCount, setQuestionCount] = useState<number>(5);
 
-  const countriesList = getAllCountries();
+  const difficulty = preferences?.difficulty || 'medium';
+  const selectedContinent = preferences?.selectedContinent || '';
+  const selectedCountry = preferences?.selectedCountry || '';
+  const questionCount = preferences?.questionCount || 10;
+
+  const continentObj = selectedContinent ? getContinentById(selectedContinent) : null;
+  const countryObj = selectedCountry ? getCountryById(selectedCountry) : null;
 
   const handleLaunch = () => {
     onStartQuiz({
@@ -197,104 +214,44 @@ export const QuizHub: React.FC<QuizHubProps> = ({
         </div>
       </div>
 
-      {/* 2. Configuration Options (Filters & Difficulty) */}
-      <Card title="Configuration &amp; Filtres Régionaux" headerAction={<SlidersHorizontal className="h-4 w-4 text-slate-400" />}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Difficulty Level */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-              Niveau de Difficulté
-            </label>
-            <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-800">
-              {(['easy', 'medium', 'hard'] as DifficultyLevel[]).map((lvl) => (
-                <button
-                  key={lvl}
-                  type="button"
-                  onClick={() => setDifficulty(lvl)}
-                  className={`min-h-9.5 py-1 text-xs font-semibold rounded-lg capitalize transition-all ${
-                    difficulty === lvl
-                      ? 'bg-emerald-600 text-white shadow-sm'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                  }`}
-                >
-                  {lvl === 'easy' ? 'Facile' : lvl === 'medium' ? 'Moyen' : 'Difficile'}
-                </button>
-              ))}
-            </div>
+      {/* 2. Active Configuration Summary (Configured in Settings) */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 text-white shadow-lg">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal className="h-4 w-4 text-emerald-400" />
+            <h4 className="text-sm font-bold text-slate-100">Filtres &amp; Configuration Actifs</h4>
           </div>
-
-          {/* Continent Filter */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-              Filtrer par Continent
-            </label>
-            <select
-              value={selectedContinent}
-              onChange={(e) => {
-                setSelectedContinent(e.target.value);
-                setSelectedCountry('');
-              }}
-              className="w-full min-h-11 px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-            >
-              <option value="">Tous les Continents</option>
-              {CONTINENTS_DATA.map((cont) => (
-                <option key={cont.id} value={cont.id}>
-                  {cont.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Country Filter (5+ cities) */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-              Filtrer par Pays Spécifique
-            </label>
-            <select
-              value={selectedCountry}
-              onChange={(e) => setSelectedCountry(e.target.value)}
-              className="w-full min-h-11 px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-            >
-              <option value="">Tous les Pays (Global)</option>
-              {countriesList
-                .filter((c) => !selectedContinent || c.continentId === selectedContinent)
-                .map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.flag} {c.name} (5+ Villes)
-                  </option>
-                ))}
-            </select>
-          </div>
-
-          {/* Question Count */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-              Nombre de Questions
-            </label>
-            <select
-              value={questionCount}
-              onChange={(e) => setQuestionCount(Number(e.target.value))}
-              className="w-full min-h-11 px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-            >
-              <option value={5}>5 Questions (Rapide)</option>
-              <option value={10}>10 Questions (Standard)</option>
-              <option value={20}>20 Questions (Défi Long)</option>
-            </select>
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <Badge variant="emerald" size="sm">
+              Difficulté : {difficulty === 'easy' ? 'Facile' : difficulty === 'medium' ? 'Moyen' : 'Difficile'}
+            </Badge>
+            <Badge variant="slate" size="sm">
+              Région : {countryObj ? `${countryObj.flag} ${countryObj.name}` : continentObj ? continentObj.name : 'Monde (Tous)'}
+            </Badge>
+            <Badge variant="slate" size="sm">
+              {questionCount} Questions
+            </Badge>
           </div>
         </div>
-      </Card>
 
-      {/* Launch Action */}
-      <div className="flex justify-end pt-2">
-        <Button
-          variant="primary"
-          size="lg"
-          onClick={handleLaunch}
-          className="w-full sm:w-auto px-8 shadow-xl shadow-emerald-600/30"
-        >
-          <Play className="h-5 w-5 fill-current" />
-          Lancer le Quiz ({questionCount} Qs)
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          {onOpenSettings && (
+            <Button variant="ghost" size="sm" onClick={onOpenSettings} className="min-h-11 text-slate-300 hover:text-white">
+              <SettingsIcon className="h-4 w-4" />
+              <span className="text-xs font-semibold">Paramètres</span>
+            </Button>
+          )}
+
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={handleLaunch}
+            className="w-full sm:w-auto px-7 shadow-xl shadow-emerald-600/30"
+          >
+            <Play className="h-5 w-5 fill-current" />
+            Lancer le Quiz ({questionCount} Qs)
+          </Button>
+        </div>
       </div>
     </div>
   );

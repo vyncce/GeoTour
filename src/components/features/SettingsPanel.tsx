@@ -4,7 +4,9 @@ import React, { useRef } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { UserPreferences, AppState } from '@/types/storage';
-import { Download, Upload, RotateCcw, ShieldCheck } from 'lucide-react';
+import { DifficultyLevel } from '@/types/geo';
+import { CONTINENTS_DATA, getAllCountries } from '@/data/geoDataset';
+import { Download, Upload, RotateCcw, ShieldCheck, SlidersHorizontal } from 'lucide-react';
 
 export interface SettingsPanelProps {
   preferences: UserPreferences;
@@ -22,6 +24,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onResetState,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const countriesList = getAllCountries();
 
   const handleExport = () => {
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(appState, null, 2));
@@ -60,9 +63,102 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
           Paramètres &amp; Gestion Locale
         </h2>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-          Préférences utilisateur et sauvegarde des données LocalStorage
+          Préférences utilisateur, filtres par défaut des quiz et sauvegarde locale
         </p>
       </div>
+
+      {/* 1. Configuration & Regional Filters Card */}
+      <Card
+        title="Configuration &amp; Filtres Régionaux"
+        description="Personnalisez la difficulté par défaut et les filtres géographiques des quiz"
+        headerAction={<SlidersHorizontal className="h-4 w-4 text-emerald-500" />}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Difficulty Level */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              Niveau de Difficulté
+            </label>
+            <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-800">
+              {(['easy', 'medium', 'hard'] as DifficultyLevel[]).map((lvl) => (
+                <button
+                  key={lvl}
+                  type="button"
+                  onClick={() => onUpdatePreferences({ difficulty: lvl })}
+                  className={`min-h-9.5 py-1 text-xs font-semibold rounded-lg capitalize transition-all ${
+                    (preferences.difficulty || 'medium') === lvl
+                      ? 'bg-emerald-600 text-white shadow-sm'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                  }`}
+                >
+                  {lvl === 'easy' ? 'Facile' : lvl === 'medium' ? 'Moyen' : 'Difficile'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Continent Filter */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              Filtrer par Continent
+            </label>
+            <select
+              value={preferences.selectedContinent || ''}
+              onChange={(e) => {
+                onUpdatePreferences({
+                  selectedContinent: e.target.value,
+                  selectedCountry: '',
+                });
+              }}
+              className="w-full min-h-11 px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            >
+              <option value="">Tous les Continents</option>
+              {CONTINENTS_DATA.map((cont) => (
+                <option key={cont.id} value={cont.id}>
+                  {cont.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Country Filter */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              Filtrer par Pays Spécifique
+            </label>
+            <select
+              value={preferences.selectedCountry || ''}
+              onChange={(e) => onUpdatePreferences({ selectedCountry: e.target.value })}
+              className="w-full min-h-11 px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            >
+              <option value="">Tous les Pays (Global)</option>
+              {countriesList
+                .filter((c) => !preferences.selectedContinent || c.continentId === preferences.selectedContinent)
+                .map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.flag} {c.name} (5+ Villes)
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          {/* Question Count */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              Nombre de Questions
+            </label>
+            <select
+              value={preferences.questionCount || 10}
+              onChange={(e) => onUpdatePreferences({ questionCount: Number(e.target.value) })}
+              className="w-full min-h-11 px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            >
+              <option value={5}>5 Questions (Rapide)</option>
+              <option value={10}>10 Questions (Standard)</option>
+              <option value={20}>20 Questions (Défi Long)</option>
+            </select>
+          </div>
+        </div>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Card 1: User Preferences */}
