@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { QuizCategory, QuizConfig } from '@/types/geo';
@@ -24,8 +23,6 @@ export interface QuizHubProps {
   onStartQuiz: (config: QuizConfig) => void;
   onOpenStats: () => void;
   onOpenSettings?: () => void;
-  onOpenWorldQuiz?: () => void;
-  onOpenContinentQuiz?: () => void;
 }
 
 export const QuizHub: React.FC<QuizHubProps> = ({
@@ -33,8 +30,6 @@ export const QuizHub: React.FC<QuizHubProps> = ({
   onStartQuiz,
   onOpenStats,
   onOpenSettings,
-  onOpenWorldQuiz,
-  onOpenContinentQuiz,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<QuizCategory>('capitals');
 

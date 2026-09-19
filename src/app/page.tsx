@@ -116,8 +116,6 @@ export default function Home() {
           onStartQuiz={handleStartQuiz}
           onOpenStats={() => setScreenMode('stats')}
           onOpenSettings={() => setScreenMode('settings')}
-          onOpenWorldQuiz={() => setScreenMode('quiz-world')}
-          onOpenContinentQuiz={() => setScreenMode('quiz-continent')}
         />
       )}
 
