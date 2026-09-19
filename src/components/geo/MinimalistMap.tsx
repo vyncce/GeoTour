@@ -55,7 +55,7 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
   return (
     <div
       className={cn(
-        'relative w-full aspect-[16/10] max-h-[500px] rounded-3xl overflow-hidden',
+        'relative w-full aspect-16/10 max-h-125 rounded-3xl overflow-hidden',
         'bg-slate-950 border border-slate-800 shadow-2xl select-none',
         'transition-all duration-500',
         className
@@ -151,7 +151,7 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
                 className={cn(
                   'transition-all duration-300 cursor-default stroke-linejoin-round',
                   isTarget
-                    ? 'fill-emerald-500/35 stroke-emerald-400 stroke-[2] drop-shadow-[0_0_12px_rgba(16,185,129,0.6)]'
+                    ? 'fill-emerald-500/35 stroke-emerald-400 stroke-2 drop-shadow-[0_0_12px_rgba(16,185,129,0.6)]'
                     : 'fill-slate-800/90 hover:fill-slate-700/90 stroke-slate-600/70 hover:stroke-emerald-500/60 stroke-[1.2]'
                 )}
               />
@@ -215,7 +215,7 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
                 type="button"
                 onClick={() => onMarkerClick?.(marker.id)}
                 className={cn(
-                  'flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-full transition-all duration-300 focus:outline-none focus:scale-125',
+                  'flex items-center justify-center min-w-11 min-h-11 p-2 rounded-full transition-all duration-300 focus:outline-none focus:scale-125',
                   isTarget && 'scale-125 z-30',
                   isCorrect && 'animate-bounce text-emerald-400 scale-125',
                   isWrong && 'animate-pulse text-rose-500 scale-125'
