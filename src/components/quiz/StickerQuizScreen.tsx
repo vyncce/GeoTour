@@ -580,9 +580,9 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
 
             {/* Natural Earth 50m Country Vector Outlines */}
             <g filter="url(#landGlow)">
-              {sessionData?.countryPaths.map((country) => (
+              {sessionData?.countryPaths.map((country, idx) => (
                 <path
-                  key={country.id}
+                  key={`${country.id}-${idx}`}
                   d={country.d}
                   className="fill-slate-800/90 stroke-slate-700/80 stroke-1 hover:fill-slate-750 transition-colors duration-200"
                 />

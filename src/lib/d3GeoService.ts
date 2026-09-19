@@ -143,9 +143,9 @@ export function generateWorldMapPaths(width: number, height: number) {
   // Landmass outline
   const landPath = pathGenerator(WORLD_LAND_FEATURE) || '';
 
-  // Country paths with IDs
-  const countryPaths = WORLD_COUNTRIES_FEATURE_COLLECTION.features.map((feature) => ({
-    id: String(feature.id || feature.properties?.name || Math.random()),
+  // Country paths with unique IDs
+  const countryPaths = WORLD_COUNTRIES_FEATURE_COLLECTION.features.map((feature, idx) => ({
+    id: `${feature.id || 'feat'}-${feature.properties?.name || 'country'}-${idx}`,
     name: feature.properties?.name || '',
     d: pathGenerator(feature) || '',
   }));
@@ -205,8 +205,8 @@ export function generateContinentMapPaths(
   const graticule = d3Geo.geoGraticule().step([10, 10])();
   const graticulePath = pathGenerator(graticule) || '';
 
-  const countryPaths = featureCollection.features.map((feature) => ({
-    id: String(feature.id || feature.properties?.name || Math.random()),
+  const countryPaths = featureCollection.features.map((feature, idx) => ({
+    id: `${feature.id || 'cont-feat'}-${feature.properties?.name || 'country'}-${idx}`,
     name: feature.properties?.name || '',
     d: pathGenerator(feature) || '',
   }));

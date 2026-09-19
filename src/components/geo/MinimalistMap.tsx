@@ -332,7 +332,7 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
             />
 
             {/* Continent Country Features with Highlight for target country */}
-            {continentMap.countryPaths.map((c) => {
+            {continentMap.countryPaths.map((c, idx) => {
               const isTarget = isMatchingCountryFeature(
                 c.name,
                 countryId || targetId,
@@ -341,7 +341,7 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
 
               return (
                 <path
-                  key={c.id}
+                  key={`${c.id}-${idx}`}
                   d={c.d}
                   className={cn(
                     'transition-all duration-300',
@@ -376,7 +376,7 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
             />
 
             {/* World Countries with Highlight for target country */}
-            {worldMap.countryPaths.map((c) => {
+            {worldMap.countryPaths.map((c, idx) => {
               const isTarget = isMatchingCountryFeature(
                 c.name,
                 countryId || targetId,
@@ -385,7 +385,7 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
 
               return (
                 <path
-                  key={c.id}
+                  key={`${c.id}-${idx}`}
                   d={c.d}
                   className={cn(
                     'transition-all duration-300',
