@@ -5,6 +5,8 @@ import { GeoPoint } from '@/types/geo';
 import { cn } from '@/lib/utils';
 import { Star, MapPin, Compass, Navigation } from 'lucide-react';
 import { getMapDataForContext } from '@/data/vectorMaps';
+import { COUNTRY_GEOMETRIES } from '@/data/geoJsonData';
+import { computeBoundingBox, createProjector } from '@/lib/geoProjection';
 
 export interface MapMarker {
   id: string;
@@ -46,11 +48,51 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
   highlightCountryName,
   className,
 }) => {
-  // Determine vector map dataset and map projection type
+  // Check if we have real GeoJSON geometry for current country
+  const geoJsonGeometry = countryId ? COUNTRY_GEOMETRIES[countryId] : null;
+
+  // Compute dynamic cartographic projection when GeoJSON is available
+  const cartoProjection = useMemo(() => {
+    if (!geoJsonGeometry) return null;
+
+    const width = 800;
+    const height = 500;
+    const bounds = computeBoundingBox(geoJsonGeometry);
+    const projector = createProjector({ width, height, padding: 40, bounds });
+    const pathD = projector.svgPath(geoJsonGeometry);
+
+    return {
+      width,
+      height,
+      viewBox: `0 0 ${width} ${height}`,
+      pathD,
+      project: projector.project,
+    };
+  }, [geoJsonGeometry]);
+
+  // Fallback / standard vector maps for continents & world
   const { mapData, mapType } = useMemo(
     () => getMapDataForContext(category, continentId, countryId),
     [category, continentId, countryId]
   );
+
+  // Helper to get screen percentage coordinates for any marker
+  const getMarkerPosition = (coords: GeoPoint): { left: string; top: string } => {
+    if (cartoProjection && coords.lat !== undefined && coords.lng !== undefined) {
+      const [px, py] = cartoProjection.project([coords.lng, coords.lat]);
+      return {
+        left: `${(px / cartoProjection.width) * 100}%`,
+        top: `${(py / cartoProjection.height) * 100}%`,
+      };
+    }
+    // Fallback to normalized percentage coordinates
+    return {
+      left: `${coords.x}%`,
+      top: `${coords.y}%`,
+    };
+  };
+
+  const currentTargetPos = targetCoords ? getMarkerPosition(targetCoords) : null;
 
   return (
     <div
@@ -104,67 +146,95 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
       </svg>
 
       {/* Dynamic Realistic Vector Map Rendering */}
-      <svg
-        viewBox={mapData.viewBox}
-        className="absolute inset-0 w-full h-full transition-all duration-700 ease-out"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        {/* Ocean Halo / Shoreline Contour Effect */}
-        {mapData.features.map((feature) => (
+      {cartoProjection ? (
+        // 1. High-Precision Cartographic GeoJSON Render
+        <svg
+          viewBox={cartoProjection.viewBox}
+          className="absolute inset-0 w-full h-full transition-all duration-700 ease-out"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          {/* Ocean Shoreline Halo */}
           <path
-            key={`halo-${feature.id}`}
-            d={feature.d}
+            d={cartoProjection.pathD}
             fill="none"
             stroke="currentColor"
-            strokeWidth="3.5"
+            strokeWidth="4"
             strokeLinejoin="round"
             strokeLinecap="round"
-            className="text-emerald-500/10 pointer-events-none"
+            className="text-emerald-500/15 pointer-events-none"
           />
-        ))}
 
-        {/* Decorative Hydrography & River Accents */}
-        {mapData.decorativePaths?.map((pathD, idx) => (
+          {/* Real Landmass Shape */}
           <path
-            key={`dec-${idx}`}
-            d={pathD}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="0.8"
-            strokeDasharray="2.5 2.5"
-            strokeLinecap="round"
-            className="text-sky-400/40 pointer-events-none transition-opacity duration-300"
+            d={cartoProjection.pathD}
+            filter="url(#glow-target)"
+            className="fill-slate-800/95 stroke-emerald-400/80 stroke-2 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all duration-300"
           />
-        ))}
+        </svg>
+      ) : (
+        // 2. Standard Context Map (Continents / World Planisphere)
+        <svg
+          viewBox={mapData.viewBox}
+          className="absolute inset-0 w-full h-full transition-all duration-700 ease-out"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          {/* Ocean Halo / Shoreline Contour Effect */}
+          {mapData.features.map((feature) => (
+            <path
+              key={`halo-${feature.id}`}
+              d={feature.d}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3.5"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              className="text-emerald-500/10 pointer-events-none"
+            />
+          ))}
 
-        {/* Realistic Geographic Landmass Features */}
-        {mapData.features.map((feature) => {
-          const isTarget =
-            targetId === feature.id ||
-            (targetName && feature.name.toLowerCase().includes(targetName.toLowerCase()));
+          {/* Decorative Hydrography & River Accents */}
+          {mapData.decorativePaths?.map((pathD, idx) => (
+            <path
+              key={`dec-${idx}`}
+              d={pathD}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="0.8"
+              strokeDasharray="2.5 2.5"
+              strokeLinecap="round"
+              className="text-sky-400/40 pointer-events-none transition-opacity duration-300"
+            />
+          ))}
 
-          return (
-            <g key={feature.id} className="transition-all duration-300 group">
-              <path
-                d={feature.d}
-                filter={isTarget ? 'url(#glow-target)' : undefined}
-                className={cn(
-                  'transition-all duration-300 cursor-default stroke-linejoin-round',
-                  isTarget
-                    ? 'fill-emerald-500/35 stroke-emerald-400 stroke-2 drop-shadow-[0_0_12px_rgba(16,185,129,0.6)]'
-                    : 'fill-slate-800/90 hover:fill-slate-700/90 stroke-slate-600/70 hover:stroke-emerald-500/60 stroke-[1.2]'
-                )}
-              />
-            </g>
-          );
-        })}
-      </svg>
+          {/* Realistic Geographic Landmass Features */}
+          {mapData.features.map((feature) => {
+            const isTarget =
+              targetId === feature.id ||
+              (targetName && feature.name.toLowerCase().includes(targetName.toLowerCase()));
+
+            return (
+              <g key={feature.id} className="transition-all duration-300 group">
+                <path
+                  d={feature.d}
+                  filter={isTarget ? 'url(#glow-target)' : undefined}
+                  className={cn(
+                    'transition-all duration-300 cursor-default stroke-linejoin-round',
+                    isTarget
+                      ? 'fill-emerald-500/35 stroke-emerald-400 stroke-2 drop-shadow-[0_0_12px_rgba(16,185,129,0.6)]'
+                      : 'fill-slate-800/90 hover:fill-slate-700/90 stroke-slate-600/70 hover:stroke-emerald-500/60 stroke-[1.2]'
+                  )}
+                />
+              </g>
+            );
+          })}
+        </svg>
+      )}
 
       {/* Target Crosshair Pulse Indicator */}
-      {targetCoords && (
+      {currentTargetPos && (
         <div
           className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10 transition-all duration-500"
-          style={{ left: `${targetCoords.x}%`, top: `${targetCoords.y}%` }}
+          style={currentTargetPos}
         >
           <span className="relative flex h-10 w-10 items-center justify-center">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -182,7 +252,13 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
           <span>{highlightCountryName || mapData.name}</span>
         </div>
         <div className="hidden sm:inline-flex px-2.5 py-1 rounded-lg bg-slate-950/80 backdrop-blur-md border border-slate-800 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
-          {mapType === 'country' ? 'Vue Pays Réaliste' : mapType === 'continent' ? 'Vue Continentale' : 'Planisphère'}
+          {cartoProjection
+            ? 'Projection GPS WGS84'
+            : mapType === 'country'
+            ? 'Vue Pays Réaliste'
+            : mapType === 'continent'
+            ? 'Vue Continentale'
+            : 'Planisphère'}
         </div>
       </div>
 
@@ -194,22 +270,23 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
         </div>
         <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/85 backdrop-blur-md border border-slate-800 text-[10px] font-mono text-slate-400 shadow-md">
           <div className="w-8 h-1 bg-emerald-500/40 border border-emerald-400 rounded-sm" />
-          <span>Échelle vectorielle</span>
+          <span>Échelle GPS</span>
         </div>
       </div>
 
-      {/* Interactive Map Markers */}
+      {/* Interactive Map Markers with Precise GPS Placement */}
       <div className="absolute inset-0 w-full h-full pointer-events-none">
         {markers.map((marker) => {
           const isTarget = activeMarkerId === marker.id;
           const isCorrect = marker.isCorrect === true;
           const isWrong = marker.isCorrect === false;
+          const pos = getMarkerPosition(marker.coords);
 
           return (
             <div
               key={marker.id}
               className="absolute -translate-x-1/2 -translate-y-1/2 z-20 group pointer-events-auto transition-all duration-500"
-              style={{ left: `${marker.coords.x}%`, top: `${marker.coords.y}%` }}
+              style={pos}
             >
               <button
                 type="button"

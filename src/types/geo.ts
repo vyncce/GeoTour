@@ -2,8 +2,10 @@ export type QuizCategory = 'continents' | 'countries' | 'capitals' | 'cities';
 export type DifficultyLevel = 'easy' | 'medium' | 'hard';
 
 export interface GeoPoint {
-  x: number; // Percentage 0 - 100 on map SVG
-  y: number; // Percentage 0 - 100 on map SVG
+  lat?: number; // GPS Latitude (WGS84, -90 to 90)
+  lng?: number; // GPS Longitude (WGS84, -180 to 180)
+  x: number;   // Percentage 0 - 100 or projected coordinate on map SVG
+  y: number;   // Percentage 0 - 100 or projected coordinate on map SVG
 }
 
 export interface City {

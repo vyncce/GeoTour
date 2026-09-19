@@ -3,6 +3,8 @@ import {
   Question,
   AnswerLog,
   QuizSessionResult,
+  City,
+  Country,
 } from '@/types/geo';
 import { CONTINENTS_DATA, getAllCountries, getAllCities, getCountryById, getContinentById } from '@/data/geoDataset';
 
@@ -114,12 +116,15 @@ export function generateQuizQuestions(config: QuizConfig): Question[] {
 
   // 4. CATEGORY: MAJOR CITIES (5+ cities per country)
   else if (category === 'cities') {
-    let citiesPool = getAllCities();
+    let citiesPool: { city: City; country: Country }[] = [];
     if (countryId) {
       const c = getCountryById(countryId);
       if (c) citiesPool = c.cities.map((city) => ({ city, country: c }));
-    } else if (continentId) {
-      citiesPool = citiesPool.filter((item) => item.country.continentId === continentId);
+    } else {
+      const countries = continentId
+        ? getAllCountries().filter((c) => c.continentId === continentId)
+        : getAllCountries();
+      citiesPool = countries.flatMap((c) => c.cities.map((city) => ({ city, country: c })));
     }
 
     const shuffledCities = shuffleArray(citiesPool);
