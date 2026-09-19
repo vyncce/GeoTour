@@ -3,7 +3,7 @@
 import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import { GeoPoint } from '@/types/geo';
 import { cn } from '@/lib/utils';
-import { Star, MapPin, Compass, Navigation, ZoomIn, ZoomOut, Move, Globe } from 'lucide-react';
+import { Star, MapPin, Navigation, ZoomIn, ZoomOut, Move, Globe } from 'lucide-react';
 import {
   generateSingleCountryMap,
   generateContinentMapPaths,
@@ -42,7 +42,7 @@ const MAP_WIDTH = 800;
 const MAP_HEIGHT = 500;
 
 export const MinimalistMap: React.FC<MinimalistMapProps> = ({
-  category,
+  category: _category,
   continentId,
   countryId,
   targetId,
@@ -72,8 +72,42 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
     return 'world';
   }, [countryId, effectiveContinentId]);
 
-  // Active view mode: 'country' (zoomed), 'continent' (regional), or 'world' (global)
-  const [viewMode, setViewMode] = useState<'country' | 'continent' | 'world'>(defaultMode);
+  // Target key to reset zoom, pan and view mode when target changes
+  const targetKey = `${countryId || ''}-${continentId || ''}-${targetId || ''}`;
+  const [prevTargetKey, setPrevTargetKey] = useState(targetKey);
+  const [userViewMode, setUserViewMode] = useState<'country' | 'continent' | 'world' | null>(null);
+
+  // Zoom & Pan state
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [panOffset, setPanOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState<boolean>(false);
+  const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Reset during render if target key changed
+  if (prevTargetKey !== targetKey) {
+    setPrevTargetKey(targetKey);
+    setUserViewMode(null);
+    setZoomLevel(1);
+    setPanOffset({ x: 0, y: 0 });
+  }
+
+  const viewMode = userViewMode ?? defaultMode;
+  const setViewMode = useCallback(
+    (
+      mode:
+        | 'country'
+        | 'continent'
+        | 'world'
+        | ((prev: 'country' | 'continent' | 'world') => 'country' | 'continent' | 'world')
+    ) => {
+      setUserViewMode((prev) => {
+        const current = prev ?? defaultMode;
+        return typeof mode === 'function' ? mode(current) : mode;
+      });
+    },
+    [defaultMode]
+  );
 
   // Available view modes for switcher
   const availableModes = useMemo(() => {
@@ -87,13 +121,6 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
     list.push({ id: 'world', label: 'Monde', icon: '🌍' });
     return list;
   }, [countryId, effectiveContinentId]);
-
-  // Zoom & Pan state
-  const [zoomLevel, setZoomLevel] = useState<number>(1);
-  const [panOffset, setPanOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [isPanning, setIsPanning] = useState<boolean>(false);
-  const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // 1. Single Country Natural Earth Cartography
   const countryMap = useMemo(() => {
@@ -113,13 +140,6 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
   const worldMap = useMemo(() => {
     return generateWorldMapPaths(MAP_WIDTH, MAP_HEIGHT);
   }, []);
-
-  // Reset view mode, zoom & pan when country or continent changes
-  useEffect(() => {
-    setViewMode(defaultMode);
-    setZoomLevel(1);
-    setPanOffset({ x: 0, y: 0 });
-  }, [defaultMode, countryId, continentId]);
 
   // Unified projector function based on active viewMode
   const projectPoint = useMemo(() => {
@@ -316,7 +336,7 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
             {continentMap.countryPaths.map((c) => {
               const isTarget = isMatchingCountryFeature(
                 c.name,
-                countryId,
+                countryId || targetId,
                 highlightCountryName || targetName || countryObj?.name
               );
 
@@ -360,7 +380,7 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
             {worldMap.countryPaths.map((c) => {
               const isTarget = isMatchingCountryFeature(
                 c.name,
-                countryId,
+                countryId || targetId,
                 highlightCountryName || targetName || countryObj?.name
               );
 
