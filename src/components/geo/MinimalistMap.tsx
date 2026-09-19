@@ -3,7 +3,7 @@
 import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import { GeoPoint } from '@/types/geo';
 import { cn } from '@/lib/utils';
-import { Star, MapPin, Navigation, ZoomIn, ZoomOut, Move, Globe } from 'lucide-react';
+import { Star, Navigation, ZoomIn, ZoomOut, Move, Globe } from 'lucide-react';
 import {
   generateSingleCountryMap,
   generateContinentMapPaths,
