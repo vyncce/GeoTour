@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GEOTour - Application Web Mobile-First Standalone
 
-## Getting Started
+[![Next.js](https://img.shields.io/badge/Next.js-16.3-black?logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://react.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
+[![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel)](https://vercel.com/)
 
-First, run the development server:
+GEOTour est une application Web moderne conçue selon les standards d'architecture éprouvés (**style EMCockpit**), optimisée **Mobile-First** (Smartphones & Tablettes), mono-utilisateur, entièrement autonome et **local-first** (aucune base de données distante requise, stockage dans `localStorage`).
+
+---
+
+## ✨ Fonctionnalités Principales
+
+- 📱 **Mobile & Tablette First** : Bottom navigation adaptative (`MobileNav`), sidebar sur grand écran (`AppShell`), zones d'interaction tactiles `≥ 44px` et gestion des safe areas (`env(safe-area-inset-bottom)`).
+- 💾 **Local-First / Zero Backend** : Persistance instantanée via un custom hook `useLocalStorage` typé, SSR-safe et tolérant aux pannes (fallback en mémoire).
+- 🌓 **Thèmes Clair / Sombre / Système** : Switcher de thème dynamique avec support `next-themes` et animations fluides.
+- 📦 **Export & Import JSON** : Sauvegardez et restaurez l'intégralité de vos données locales à tout moment sous forme de fichier JSON.
+- 🚀 **Prêt pour Vercel & GitHub** : Configuration optimisée App Router React 19 pour un déploiement instantané sans administration serveur.
+
+---
+
+## 🚀 Démarrage Rapide
+
+### Prérequis
+- **Node.js** v18.17+ ou v20+
+- **npm** v9+
+
+### Installation & Lancement en Développement
 
 ```bash
+# Cloner le dépôt
+git clone https://github.com/vyncce/GEOTour.git
+cd GEOTour
+
+# Installer les dépendances
+npm install
+
+# Lancer le serveur de développement
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrez ensuite [http://localhost:3000](http://localhost:3000) dans votre navigateur.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Scripts Disponibles
 
-## Learn More
+- `npm run dev` : Lance l'application en mode développement.
+- `npm run build` : Compile l'application pour la production Vercel / Next.js.
+- `npm run start` : Démarre le serveur de production local.
+- `npm run lint` : Exécute les vérifications ESLint.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🌐 Déploiement Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Poussez votre code sur GitHub.
+2. Connectez le dépôt à [Vercel](https://vercel.com).
+3. Vercel détectera automatiquement Next.js. Cliquez sur **Deploy**.
+4. Aucune variable d'environnement ou base de données n'est requise.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📚 Documentation Technique
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Retrouvez la documentation complète dans le répertoire [`docs/tech/`](docs/tech/SUMMARY.md) :
+- [Sommaire de la Documentation](docs/tech/SUMMARY.md)
+- [Architecture & Persistence Local-First](docs/tech/architecture.md)
+- [Design System & Frontend Ergonomics](docs/tech/frontend.md)
+- [Infrastructure & Deployment Guide](docs/tech/infra.md)
