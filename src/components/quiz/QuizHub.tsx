@@ -106,7 +106,7 @@ export const QuizHub: React.FC<QuizHubProps> = ({
               Testez vos Connaissances Géographiques
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Explorez nos quiz interactifs : positionnement de stickers pays/capitales sur planisphère ou quiz QCM standard.
+              Explorez nos quiz interactifs : identifiez les continents, pays, capitales et grandes villes du monde.
             </p>
           </div>
           <Button variant="secondary" onClick={onOpenStats} className="shrink-0 shadow-md">
@@ -115,67 +115,10 @@ export const QuizHub: React.FC<QuizHubProps> = ({
         </div>
       </div>
 
-      {/* Featured Mode: Sticker Quiz Modes */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-linear-to-r from-amber-500 to-emerald-500 text-white text-xs font-bold">
-              ★
-            </span>
-            Nouveaux Modes : Quiz Cartes &amp; Stickers
-          </h3>
-          <Badge variant="emerald" size="sm">Nouveau</Badge>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* World Sticker Quiz Launcher Card */}
-          <div
-            onClick={onOpenWorldQuiz}
-            className="group cursor-pointer p-5 rounded-3xl border border-emerald-500/30 bg-linear-to-br from-emerald-500/10 via-white dark:via-slate-900 to-teal-500/10 hover:border-emerald-500 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 relative overflow-hidden flex flex-col justify-between min-h-35"
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div className="p-3 rounded-2xl bg-emerald-600 text-white shadow-md shadow-emerald-600/30 group-hover:scale-110 transition-transform">
-                <Globe className="h-6 w-6" />
-              </div>
-              <Badge variant="emerald" size="sm">Planisphère 🌍</Badge>
-            </div>
-            <div>
-              <h4 className="text-lg font-black text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                Quiz Monde (Stickers)
-              </h4>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                Positionnez des stickers pays et capitales directement sur le planisphère mondial interactif.
-              </p>
-            </div>
-          </div>
-
-          {/* Continent Sticker Quiz Launcher Card */}
-          <div
-            onClick={onOpenContinentQuiz}
-            className="group cursor-pointer p-5 rounded-3xl border border-teal-500/30 bg-linear-to-br from-teal-500/10 via-white dark:via-slate-900 to-sky-500/10 hover:border-teal-500 hover:shadow-xl hover:shadow-teal-500/10 transition-all duration-300 relative overflow-hidden flex flex-col justify-between min-h-35"
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div className="p-3 rounded-2xl bg-teal-600 text-white shadow-md shadow-teal-600/30 group-hover:scale-110 transition-transform">
-                <Map className="h-6 w-6" />
-              </div>
-              <Badge variant="teal" size="sm">Régional 🗺️</Badge>
-            </div>
-            <div>
-              <h4 className="text-lg font-black text-slate-900 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
-                Quiz Continent (Stickers)
-              </h4>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                Choisissez un continent (Europe, Asie, Afrique, Amériques...) et placez ses pays et capitales clés.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 1. Category Selection */}
+      {/* Category Selection */}
       <div className="space-y-3">
         <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white text-xs font-bold">1</span>
+          <Globe className="h-5 w-5 text-emerald-500" />
           Choisissez une Catégorie de Quiz
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
