@@ -410,8 +410,8 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
             }}
           >
             <div className="relative flex items-center justify-center">
-              <span className="animate-ping absolute inline-flex h-8 w-8 rounded-full bg-emerald-400 opacity-60" />
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-linear-to-tr from-emerald-600 to-teal-400 border border-white shadow-md shadow-emerald-500/50" />
+              <span className="animate-ping absolute inline-flex h-4 w-4 rounded-full bg-emerald-400 opacity-60" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-linear-to-tr from-emerald-600 to-teal-400 border border-white shadow-xs shadow-emerald-500/50" />
             </div>
           </div>
         )}
@@ -434,7 +434,7 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
 
             if (isSelected) {
               stateStyle =
-                'bg-emerald-500 border-white text-white shadow-lg shadow-emerald-500/50 ring-2 ring-emerald-500/30';
+                'bg-emerald-500 border-white text-white shadow-md shadow-emerald-500/50 ring-2 ring-emerald-500/30';
               iconColor = 'text-white';
             }
 
@@ -451,7 +451,7 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
                 key={marker.id}
                 onClick={() => onMarkerClick && onMarkerClick(marker.id)}
                 className={cn(
-                  'absolute cursor-pointer group transition-all duration-200 ease-out z-10 before:absolute before:-inset-2 before:content-[\'\']',
+                  'absolute cursor-pointer group transition-all duration-200 ease-out z-10 before:absolute before:-inset-3 before:content-[\'\']',
                   onMarkerClick ? 'hover:brightness-125' : ''
                 )}
                 style={{
@@ -460,17 +460,17 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
                   transform: `translate(-50%, -50%) scale(${markerScale * (isSelected ? 1.25 : 1)})`,
                 }}
               >
-                {/* Marker Pin Button - Sleek & Compact Disc */}
+                {/* Marker Pin Button - Ultra-sleek Micro POI Dot (Reduced by half) */}
                 <div
                   className={cn(
-                    'flex items-center justify-center w-5.5 h-5.5 rounded-full border-[1.5px] shadow-sm transition-all duration-200 backdrop-blur-xs',
+                    'flex items-center justify-center w-3 h-3 rounded-full border shadow-xs transition-all duration-200 backdrop-blur-xs',
                     stateStyle
                   )}
                 >
                   {isCapital ? (
-                    <Star className={cn('w-3 h-3 fill-current', iconColor)} />
+                    <Star className={cn('w-1.5 h-1.5 fill-current', iconColor)} />
                   ) : (
-                    <MapPin className={cn('w-3 h-3', iconColor)} />
+                    <span className={cn('w-1 h-1 rounded-full bg-current', iconColor)} />
                   )}
                 </div>
 

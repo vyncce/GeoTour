@@ -606,27 +606,27 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
                     <>
                       {/* Pulse Ring when Active */}
                       {isHinted ? (
-                        <circle r="14" className="fill-amber-500/20 stroke-amber-400 stroke-2 animate-ping" />
+                        <circle r="7" className="fill-amber-500/20 stroke-amber-400 stroke-1 animate-ping" />
                       ) : activeSticker ? (
                         <circle
-                          r="12"
-                          className="fill-emerald-500/10 stroke-emerald-400/60 stroke-1.5 animate-pulse group-hover:scale-125 transition-transform"
+                          r="6"
+                          className="fill-emerald-500/10 stroke-emerald-400/60 stroke-1 animate-pulse group-hover:scale-125 transition-transform"
                         />
                       ) : null}
 
                       {/* Target Base Disc */}
                       <circle
-                        r="6.5"
+                        r="3.5"
                         className={`transition-all duration-200 ${
                           isHinted
-                            ? 'fill-amber-400 stroke-white stroke-2 shadow-lg shadow-amber-400'
-                            : 'fill-slate-900 stroke-emerald-400/80 stroke-1.5 group-hover:fill-emerald-500 group-hover:stroke-white'
+                            ? 'fill-amber-400 stroke-white stroke-1.5 shadow-sm shadow-amber-400'
+                            : 'fill-slate-900 stroke-emerald-400/80 stroke-1 group-hover:fill-emerald-500 group-hover:stroke-white'
                         }`}
                       />
 
                       {/* Target Inner Dot */}
                       <circle
-                        r="2.5"
+                        r="1.2"
                         className={isHinted ? 'fill-slate-950' : 'fill-emerald-400 group-hover:fill-white'}
                       />
 
