@@ -98,3 +98,32 @@ export interface CountryMastery {
   accuracyRate: number;
   lastPlayedAt: string;
 }
+
+export type StickerQuizType = 'countries' | 'capitals' | 'mixed';
+export type StickerQuizScope = 'world' | 'continent';
+
+export interface StickerItem {
+  id: string;
+  type: 'country' | 'capital';
+  label: string;
+  flag: string;
+  countryName: string;
+  countryId: string;
+  continentId: string;
+  coords: { lat: number; lng: number };
+  isPlaced: boolean;
+  placedAt?: { x: number; y: number };
+}
+
+export interface StickerTarget {
+  id: string;
+  stickerId: string;
+  label: string;
+  countryId: string;
+  continentId: string;
+  coords: { lat: number; lng: number };
+  svgCoords: { x: number; y: number };
+  placedSticker?: StickerItem;
+  isRevealed?: boolean;
+}
+

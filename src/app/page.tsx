@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { AppShell } from '@/components/layout/AppShell';
 import { QuizHub } from '@/components/quiz/QuizHub';
 import { QuizScreen } from '@/components/quiz/QuizScreen';
+import { StickerQuizScreen } from '@/components/quiz/StickerQuizScreen';
 import { QuizResults } from '@/components/quiz/QuizResults';
 import { StatsDashboard } from '@/components/quiz/StatsDashboard';
 import { SettingsPanel } from '@/components/features/SettingsPanel';
@@ -12,9 +13,9 @@ import { useIndexedDB } from '@/hooks/useIndexedDB';
 import { QuizConfig, QuizSessionResult } from '@/types/geo';
 import { UserPreferences, AppState } from '@/types/storage';
 import { NavItem } from '@/types/ui';
-import { PlayCircle, Trophy, Settings as SettingsIcon } from 'lucide-react';
+import { PlayCircle, Globe, Map, Trophy, Settings as SettingsIcon } from 'lucide-react';
 
-type ScreenMode = 'hub' | 'quiz' | 'result' | 'stats' | 'settings';
+type ScreenMode = 'hub' | 'quiz' | 'quiz-world' | 'quiz-continent' | 'result' | 'stats' | 'settings';
 
 const INITIAL_PREFERENCES: UserPreferences = {
   theme: 'system',
@@ -51,13 +52,25 @@ export default function Home() {
   const navItems: NavItem[] = [
     {
       id: 'hub',
-      label: 'Quiz Hub',
+      label: 'Quiz QCM',
       href: '#',
       icon: PlayCircle,
     },
     {
+      id: 'quiz-world',
+      label: 'Quiz Monde',
+      href: '#',
+      icon: Globe,
+    },
+    {
+      id: 'quiz-continent',
+      label: 'Quiz Continent',
+      href: '#',
+      icon: Map,
+    },
+    {
       id: 'stats',
-      label: 'Scores & IDB',
+      label: 'Scores',
       href: '#',
       icon: Trophy,
       badge: sessions.length > 0 ? sessions.length : undefined,
@@ -97,10 +110,39 @@ export default function Home() {
         <QuizHub
           onStartQuiz={handleStartQuiz}
           onOpenStats={() => setScreenMode('stats')}
+          onOpenWorldQuiz={() => setScreenMode('quiz-world')}
+          onOpenContinentQuiz={() => setScreenMode('quiz-continent')}
         />
       )}
 
-      {/* 2. ACTIVE QUIZ RUNNER SCREEN */}
+      {/* 2. QUIZ MONDE (STICKERS PLANISPHÈRE) */}
+      {screenMode === 'quiz-world' && (
+        <StickerQuizScreen
+          scope="world"
+          onComplete={(res) => {
+            addSession(res);
+            setLastSessionResult(res);
+            setScreenMode('result');
+          }}
+          onBack={() => setScreenMode('hub')}
+        />
+      )}
+
+      {/* 3. QUIZ CONTINENT (STICKERS CONTINENTAUX) */}
+      {screenMode === 'quiz-continent' && (
+        <StickerQuizScreen
+          scope="continent"
+          initialContinentId="europe"
+          onComplete={(res) => {
+            addSession(res);
+            setLastSessionResult(res);
+            setScreenMode('result');
+          }}
+          onBack={() => setScreenMode('hub')}
+        />
+      )}
+
+      {/* 4. ACTIVE QCM QUIZ RUNNER SCREEN */}
       {screenMode === 'quiz' && activeQuizConfig && (
         <QuizScreen
           key={JSON.stringify(activeQuizConfig)}
@@ -110,7 +152,7 @@ export default function Home() {
         />
       )}
 
-      {/* 3. QUIZ RESULTS SUMMARY SCREEN */}
+      {/* 5. QUIZ RESULTS SUMMARY SCREEN */}
       {screenMode === 'result' && lastSessionResult && (
         <QuizResults
           result={lastSessionResult}
@@ -123,12 +165,12 @@ export default function Home() {
         />
       )}
 
-      {/* 4. INDEXEDDB STATS & HISTORY SCREEN */}
+      {/* 6. INDEXEDDB STATS & HISTORY SCREEN */}
       {screenMode === 'stats' && (
         <StatsDashboard onBack={() => setScreenMode('hub')} />
       )}
 
-      {/* 5. SETTINGS SCREEN */}
+      {/* 7. SETTINGS SCREEN */}
       {screenMode === 'settings' && (
         <SettingsPanel
           preferences={preferences}
@@ -141,3 +183,4 @@ export default function Home() {
     </AppShell>
   );
 }
+
