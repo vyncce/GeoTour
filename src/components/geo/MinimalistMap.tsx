@@ -42,7 +42,6 @@ const MAP_WIDTH = 800;
 const MAP_HEIGHT = 500;
 
 export const MinimalistMap: React.FC<MinimalistMapProps> = ({
-  category: _category,
   continentId,
   countryId,
   targetId,
