@@ -169,7 +169,7 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
   const currentTargetPos = targetCoords ? getMarkerPosition(targetCoords) : null;
 
   // Adaptive scale of markers / plots inversely proportional to zoom
-  const markerScale = Math.max(0.4, 1 / Math.sqrt(zoomLevel));
+  const markerScale = Math.max(0.2, 1 / Math.pow(zoomLevel, 0.85));
 
   // Mouse Wheel Zoom
   const handleWheel = (e: React.WheelEvent) => {
@@ -410,8 +410,8 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
             }}
           >
             <div className="relative flex items-center justify-center">
-              <span className="animate-ping absolute inline-flex h-12 w-12 rounded-full bg-emerald-400 opacity-60" />
-              <span className="relative inline-flex rounded-full h-6 w-6 bg-linear-to-tr from-emerald-600 to-teal-400 border-2 border-white shadow-lg shadow-emerald-500/50" />
+              <span className="animate-ping absolute inline-flex h-8 w-8 rounded-full bg-emerald-400 opacity-60" />
+              <span className="relative inline-flex rounded-full h-4 w-4 bg-linear-to-tr from-emerald-600 to-teal-400 border border-white shadow-md shadow-emerald-500/50" />
             </div>
           </div>
         )}
@@ -428,13 +428,13 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
             let iconColor = 'text-slate-300';
 
             if (isCapital) {
-              stateStyle = 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-amber-500/20';
+              stateStyle = 'bg-amber-500/30 border-amber-400 text-amber-300 shadow-amber-500/20';
               iconColor = 'text-amber-400';
             }
 
             if (isSelected) {
               stateStyle =
-                'bg-emerald-500 border-white text-white shadow-lg shadow-emerald-500/50 ring-4 ring-emerald-500/30';
+                'bg-emerald-500 border-white text-white shadow-lg shadow-emerald-500/50 ring-2 ring-emerald-500/30';
               iconColor = 'text-white';
             }
 
@@ -451,7 +451,7 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
                 key={marker.id}
                 onClick={() => onMarkerClick && onMarkerClick(marker.id)}
                 className={cn(
-                  'absolute cursor-pointer group transition-all duration-200 ease-out z-10',
+                  'absolute cursor-pointer group transition-all duration-200 ease-out z-10 before:absolute before:-inset-2 before:content-[\'\']',
                   onMarkerClick ? 'hover:brightness-125' : ''
                 )}
                 style={{
@@ -460,17 +460,17 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
                   transform: `translate(-50%, -50%) scale(${markerScale * (isSelected ? 1.25 : 1)})`,
                 }}
               >
-                {/* Marker Pin Button */}
+                {/* Marker Pin Button - Sleek & Compact Disc */}
                 <div
                   className={cn(
-                    'flex items-center justify-center w-8 h-8 rounded-full border-2 shadow-md transition-all duration-200 backdrop-blur-xs min-h-11 min-w-11 sm:w-8 sm:h-8',
+                    'flex items-center justify-center w-5.5 h-5.5 rounded-full border-[1.5px] shadow-sm transition-all duration-200 backdrop-blur-xs',
                     stateStyle
                   )}
                 >
                   {isCapital ? (
-                    <Star className={cn('w-4 h-4 fill-current', iconColor)} />
+                    <Star className={cn('w-3 h-3 fill-current', iconColor)} />
                   ) : (
-                    <MapPin className={cn('w-4 h-4', iconColor)} />
+                    <MapPin className={cn('w-3 h-3', iconColor)} />
                   )}
                 </div>
 

@@ -75,7 +75,7 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Adaptive scale of targets / pins inversely proportional to zoom
-  const targetScale = Math.max(0.4, 1 / Math.sqrt(zoomLevel));
+  const targetScale = Math.max(0.2, 1 / Math.pow(zoomLevel, 0.85));
 
   // Initialize or reset game session with D3 Natural Earth vector cartography
   const initSession = () => {
@@ -604,27 +604,27 @@ export const StickerQuizScreen: React.FC<StickerQuizScreenProps> = ({
                     <>
                       {/* Pulse Ring when Active */}
                       {isHinted ? (
-                        <circle r="22" className="fill-amber-500/20 stroke-amber-400 stroke-2 animate-ping" />
+                        <circle r="14" className="fill-amber-500/20 stroke-amber-400 stroke-2 animate-ping" />
                       ) : activeSticker ? (
                         <circle
-                          r="18"
+                          r="12"
                           className="fill-emerald-500/10 stroke-emerald-400/60 stroke-1.5 animate-pulse group-hover:scale-125 transition-transform"
                         />
                       ) : null}
 
                       {/* Target Base Disc */}
                       <circle
-                        r="10"
+                        r="6.5"
                         className={`transition-all duration-200 ${
                           isHinted
                             ? 'fill-amber-400 stroke-white stroke-2 shadow-lg shadow-amber-400'
-                            : 'fill-slate-900 stroke-emerald-400/80 stroke-2 group-hover:fill-emerald-500 group-hover:stroke-white'
+                            : 'fill-slate-900 stroke-emerald-400/80 stroke-1.5 group-hover:fill-emerald-500 group-hover:stroke-white'
                         }`}
                       />
 
                       {/* Target Inner Dot */}
                       <circle
-                        r="4"
+                        r="2.5"
                         className={isHinted ? 'fill-slate-950' : 'fill-emerald-400 group-hover:fill-white'}
                       />
 
