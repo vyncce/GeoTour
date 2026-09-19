@@ -29,7 +29,7 @@ export const QuizResults: React.FC<QuizResultsProps> = ({
   return (
     <div className="space-y-6 animate-in fade-in duration-300 max-w-3xl mx-auto">
       {/* Trophy Card */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 p-6 sm:p-8 text-white shadow-2xl text-center">
+      <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-slate-900 via-slate-800 to-emerald-950 p-6 sm:p-8 text-white shadow-2xl text-center">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 mb-4 shadow-lg shadow-amber-500/30">
           <Trophy className="h-8 w-8 animate-bounce" />
         </div>

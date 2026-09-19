@@ -34,7 +34,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, activeTab, onTabCha
             >
               {/* Active Indicator Bar */}
               {isActive && (
-                <span className="absolute top-0 w-8 h-1 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-b-full shadow-sm shadow-emerald-500/50 animate-in fade-in zoom-in duration-200" />
+                <span className="absolute top-0 w-8 h-1 bg-linear-to-r from-emerald-500 to-teal-400 rounded-b-full shadow-sm shadow-emerald-500/50 animate-in fade-in zoom-in duration-200" />
               )}
 
               <div className="relative">
@@ -51,7 +51,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, activeTab, onTabCha
                 )}
               </div>
 
-              <span className="text-[11px] mt-1 tracking-tight leading-tight truncate max-w-[72px]">
+              <span className="text-[11px] mt-1 tracking-tight leading-tight truncate max-w-18">
                 {item.label}
               </span>
             </button>
