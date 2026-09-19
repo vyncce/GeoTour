@@ -48,8 +48,44 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
   highlightCountryName,
   className,
 }) => {
-  // Check if we have real GeoJSON geometry for current country
-  const geoJsonGeometry = countryId ? COUNTRY_GEOMETRIES[countryId] : null;
+  // Check if we have real GeoJSON geometry for current country or compute bounding geometry
+  const geoJsonGeometry = useMemo(() => {
+    if (countryId && COUNTRY_GEOMETRIES[countryId]) {
+      return COUNTRY_GEOMETRIES[countryId];
+    }
+
+    // Fallback: If country has markers with GPS coordinates, generate smooth bounding geometry
+    if (countryId && markers.length > 0) {
+      const validPoints = markers
+        .filter((m) => m.coords.lat !== undefined && m.coords.lng !== undefined)
+        .map((m) => [m.coords.lng!, m.coords.lat!] as [number, number]);
+
+      if (validPoints.length >= 2) {
+        let minLng = Math.min(...validPoints.map((p) => p[0]));
+        let maxLng = Math.max(...validPoints.map((p) => p[0]));
+        let minLat = Math.min(...validPoints.map((p) => p[1]));
+        let maxLat = Math.max(...validPoints.map((p) => p[1]));
+
+        const padLng = Math.max(0.6, (maxLng - minLng) * 0.3);
+        const padLat = Math.max(0.6, (maxLat - minLat) * 0.3);
+
+        return {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [minLng - padLng, minLat - padLat],
+              [maxLng + padLng, minLat - padLat],
+              [maxLng + padLng, maxLat + padLat],
+              [minLng - padLng, maxLat + padLat],
+              [minLng - padLng, minLat - padLat],
+            ],
+          ],
+        };
+      }
+    }
+
+    return null;
+  }, [countryId, markers]);
 
   // Compute dynamic cartographic projection when GeoJSON is available
   const cartoProjection = useMemo(() => {
@@ -57,9 +93,9 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
 
     const width = 800;
     const height = 500;
-    const bounds = computeBoundingBox(geoJsonGeometry);
+    const bounds = computeBoundingBox(geoJsonGeometry as any);
     const projector = createProjector({ width, height, padding: 40, bounds });
-    const pathD = projector.svgPath(geoJsonGeometry);
+    const pathD = projector.svgPath(geoJsonGeometry as any);
 
     return {
       width,
