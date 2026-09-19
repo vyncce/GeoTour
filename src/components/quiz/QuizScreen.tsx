@@ -152,85 +152,162 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ config, onCompleteQuiz, 
         className="shadow-xl"
       />
 
-      {/* Question Prompt */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 space-y-4 shadow-sm">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
-              {currentQuestion.title}
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
-              {currentQuestion.prompt}
-            </p>
-          </div>
-          {currentQuestion.hint && (
-            <Badge variant="sky" size="sm" className="hidden sm:inline-flex">
-              <HelpCircle className="h-3 w-3" />
-              {currentQuestion.hint}
-            </Badge>
-          )}
-        </div>
-
-        {/* QCM Answer Options */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
-          {currentQuestion.options.map((option, idx) => {
-            const isSelected = selectedOptionIndex === idx;
-            const isCorrectOption = idx === currentQuestion.correctOptionIndex;
-
-            let optionStyle =
-              'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-750';
-
-            if (isAnswered) {
-              if (isCorrectOption) {
-                optionStyle = 'bg-emerald-500/20 border-emerald-500 text-emerald-600 dark:text-emerald-400 font-bold ring-2 ring-emerald-500/40';
-              } else if (isSelected) {
-                optionStyle = 'bg-rose-500/20 border-rose-500 text-rose-600 dark:text-rose-400 font-bold';
-              } else {
-                optionStyle = 'opacity-40 border-slate-200 dark:border-slate-800';
-              }
-            }
-
-            return (
-              <button
-                key={option}
-                type="button"
-                disabled={isAnswered}
-                onClick={() => handleSelectOption(idx)}
-                className={`flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 min-h-11 text-left text-sm font-medium ${optionStyle}`}
-              >
-                <span>{option}</span>
-                {isAnswered && isCorrectOption && (
-                  <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
+      {/* Question & Result Dual Layout (Result block on the left of the question) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+        {/* Left: Result & Feedback Status Card */}
+        <div
+          className={`flex flex-col justify-between p-4 sm:p-5 rounded-2xl border transition-all duration-300 shadow-sm ${
+            isAnswered
+              ? selectedOptionIndex === currentQuestion.correctOptionIndex
+                ? 'bg-linear-to-br from-emerald-500/15 via-emerald-500/5 to-teal-500/10 border-emerald-500/40 dark:border-emerald-500/30'
+                : 'bg-linear-to-br from-rose-500/15 via-rose-500/5 to-amber-500/10 border-rose-500/40 dark:border-rose-500/30'
+              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'
+          }`}
+        >
+          {isAnswered ? (
+            <div className="space-y-3 animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex items-center gap-2.5">
+                {selectedOptionIndex === currentQuestion.correctOptionIndex ? (
+                  <div className="p-2 rounded-xl bg-emerald-500 text-white shadow-md shadow-emerald-500/30 shrink-0">
+                    <CheckCircle2 className="h-5 w-5" />
+                  </div>
+                ) : (
+                  <div className="p-2 rounded-xl bg-rose-500 text-white shadow-md shadow-rose-500/30 shrink-0">
+                    <XCircle className="h-5 w-5" />
+                  </div>
                 )}
-                {isAnswered && isSelected && !isCorrectOption && (
-                  <XCircle className="h-5 w-5 text-rose-500 shrink-0" />
-                )}
-              </button>
-            );
-          })}
-        </div>
+                <div>
+                  <h4
+                    className={`text-sm font-extrabold ${
+                      selectedOptionIndex === currentQuestion.correctOptionIndex
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-rose-600 dark:text-rose-400'
+                    }`}
+                  >
+                    {selectedOptionIndex === currentQuestion.correctOptionIndex
+                      ? 'Bravo ! Réponse exacte'
+                      : 'Dommage ! Réponse fausse'}
+                  </h4>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                    {selectedOptionIndex === currentQuestion.correctOptionIndex
+                      ? `+${100 + Math.max(0, timeLeft * 2)} points obtenus`
+                      : `Bonne réponse : ${currentQuestion.options[currentQuestion.correctOptionIndex]}`}
+                  </p>
+                </div>
+              </div>
 
-        {/* Next Question Footer */}
-        {isAnswered && (
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800 animate-in fade-in">
-            <div className="text-xs sm:text-sm font-semibold">
-              {selectedOptionIndex === currentQuestion.correctOptionIndex ? (
-                <span className="text-emerald-500 flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4" /> Bravo ! Réponse exacte.
-                </span>
-              ) : (
-                <span className="text-rose-500 flex items-center gap-1.5">
-                  <XCircle className="h-4 w-4" /> Dommage ! La réponse était &quot;{currentQuestion.options[currentQuestion.correctOptionIndex]}&quot;.
-                </span>
+              {streak > 1 && selectedOptionIndex === currentQuestion.correctOptionIndex && (
+                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-500 bg-amber-500/10 p-2 rounded-xl border border-amber-500/20">
+                  <Flame className="h-4 w-4 fill-amber-500" />
+                  <span>Série x{streak} active !</span>
+                </div>
               )}
             </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-600 uppercase tracking-wide">
+                  Question en cours
+                </span>
+                <Badge variant="emerald" size="sm">
+                  #{currentIndex + 1}
+                </Badge>
+              </div>
 
-            <Button variant="primary" onClick={handleNextQuestion}>
-              {currentIndex + 1 < questions.length ? 'Question Suivante' : 'Voir les Résultats'}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
+              <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+                <Timer className={`h-4 w-4 ${timeLeft < 10 ? 'text-rose-500 animate-pulse' : 'text-emerald-500'}`} />
+                <span>
+                  Temps restant : <strong className="text-slate-900 dark:text-slate-100">{timeLeft}s</strong>
+                </span>
+              </div>
+
+              {streak > 0 && (
+                <div className="flex items-center gap-1.5 text-xs text-amber-500 font-bold">
+                  <Flame className="h-4 w-4 fill-amber-500" />
+                  Série active : {streak}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Action Button: Next Question or Progress Indicator */}
+          <div className="pt-4 mt-auto">
+            {isAnswered ? (
+              <Button
+                variant="primary"
+                onClick={handleNextQuestion}
+                className="w-full flex items-center justify-center gap-2 shadow-lg min-h-11"
+              >
+                <span>{currentIndex + 1 < questions.length ? 'Question Suivante' : 'Voir les Résultats'}</span>
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            ) : (
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 text-center italic">
+                Sélectionnez une réponse à droite
+              </p>
+            )}
           </div>
-        )}
+        </div>
+
+        {/* Right: Question Prompt & QCM Answer Options Card */}
+        <div className="md:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 space-y-4 shadow-sm flex flex-col justify-between">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+                {currentQuestion.title}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
+                {currentQuestion.prompt}
+              </p>
+            </div>
+            {currentQuestion.hint && (
+              <Badge variant="sky" size="sm" className="shrink-0">
+                <HelpCircle className="h-3 w-3" />
+                {currentQuestion.hint}
+              </Badge>
+            )}
+          </div>
+
+          {/* QCM Answer Options */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+            {currentQuestion.options.map((option, idx) => {
+              const isSelected = selectedOptionIndex === idx;
+              const isCorrectOption = idx === currentQuestion.correctOptionIndex;
+
+              let optionStyle =
+                'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-750';
+
+              if (isAnswered) {
+                if (isCorrectOption) {
+                  optionStyle =
+                    'bg-emerald-500/20 border-emerald-500 text-emerald-600 dark:text-emerald-400 font-bold ring-2 ring-emerald-500/40';
+                } else if (isSelected) {
+                  optionStyle = 'bg-rose-500/20 border-rose-500 text-rose-600 dark:text-rose-400 font-bold';
+                } else {
+                  optionStyle = 'opacity-40 border-slate-200 dark:border-slate-800';
+                }
+              }
+
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  disabled={isAnswered}
+                  onClick={() => handleSelectOption(idx)}
+                  className={`flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 min-h-11 text-left text-sm font-medium ${optionStyle}`}
+                >
+                  <span>{option}</span>
+                  {isAnswered && isCorrectOption && (
+                    <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
+                  )}
+                  {isAnswered && isSelected && !isCorrectOption && (
+                    <XCircle className="h-5 w-5 text-rose-500 shrink-0" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );
