@@ -9,6 +9,7 @@ import {
   generateContinentMapPaths,
   generateWorldMapPaths,
   isMatchingCountryFeature,
+  isMatchingContinentFeature,
 } from '@/lib/d3GeoService';
 import { CONTINENTS_DATA, getCountryById, getContinentById } from '@/data/geoDataset';
 
@@ -42,6 +43,7 @@ const MAP_WIDTH = 800;
 const MAP_HEIGHT = 500;
 
 export const MinimalistMap: React.FC<MinimalistMapProps> = ({
+  category,
   continentId,
   countryId,
   targetId,
@@ -230,6 +232,19 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
   const countryObj = countryId ? getCountryById(countryId) : null;
   const continentObj = effectiveContinentId ? getContinentById(effectiveContinentId) : null;
 
+  // Determine if target is a continent
+  const isContinentTarget = useMemo(() => {
+    if (category === 'continents') return true;
+    if (targetId && CONTINENTS_DATA.some((c) => c.id === targetId)) return true;
+    return false;
+  }, [category, targetId]);
+
+  const targetContinentId = useMemo(() => {
+    if (targetId && CONTINENTS_DATA.some((c) => c.id === targetId)) return targetId;
+    if (effectiveContinentId) return effectiveContinentId;
+    return undefined;
+  }, [targetId, effectiveContinentId]);
+
   return (
     <div
       ref={containerRef}
@@ -331,13 +346,16 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
               opacity="0.3"
             />
 
-            {/* Continent Country Features with Highlight for target country */}
+            {/* Continent Country Features with Highlight for target country or continent */}
             {continentMap.countryPaths.map((c, idx) => {
-              const isTarget = isMatchingCountryFeature(
-                c.name,
-                countryId || targetId,
-                highlightCountryName || targetName || countryObj?.name
-              );
+              const isTarget =
+                isContinentTarget && targetContinentId
+                  ? isMatchingContinentFeature(c.name, targetContinentId)
+                  : isMatchingCountryFeature(
+                      c.name,
+                      countryId || (!isContinentTarget ? targetId : undefined),
+                      highlightCountryName || (!isContinentTarget ? targetName : undefined) || countryObj?.name
+                    );
 
               return (
                 <path
@@ -375,13 +393,16 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
               opacity="0.4"
             />
 
-            {/* World Countries with Highlight for target country */}
+            {/* World Countries with Highlight for target country or continent */}
             {worldMap.countryPaths.map((c, idx) => {
-              const isTarget = isMatchingCountryFeature(
-                c.name,
-                countryId || targetId,
-                highlightCountryName || targetName || countryObj?.name
-              );
+              const isTarget =
+                isContinentTarget && targetContinentId
+                  ? isMatchingContinentFeature(c.name, targetContinentId)
+                  : isMatchingCountryFeature(
+                      c.name,
+                      countryId || (!isContinentTarget ? targetId : undefined),
+                      highlightCountryName || (!isContinentTarget ? targetName : undefined) || countryObj?.name
+                    );
 
               return (
                 <path

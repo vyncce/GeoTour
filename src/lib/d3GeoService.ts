@@ -65,6 +65,8 @@ export const COUNTRY_ALIASES: Record<string, string> = {
   tanzania: 'Tanzania',
 };
 
+import { getCountryById, getContinentById } from '@/data/geoDataset';
+
 /**
  * Find GeoJSON Feature for a given country ID
  */
@@ -78,42 +80,87 @@ export function getCountryGeoFeature(countryId: string): Feature<Geometry, GeoJs
   }
 
   const cleanId = countryId.toLowerCase().replace(/_/g, ' ');
+  const exactMatch = WORLD_COUNTRIES_FEATURE_COLLECTION.features.find((f) => {
+    const fn = (f.properties?.name || '').toLowerCase();
+    return fn === cleanId;
+  });
+  if (exactMatch) return exactMatch;
+
+  const country = getCountryById(countryId);
+  if (country) {
+    const countryNameLow = country.name.toLowerCase();
+    const nameMatch = WORLD_COUNTRIES_FEATURE_COLLECTION.features.find((f) => {
+      const fn = (f.properties?.name || '').toLowerCase();
+      return fn === countryNameLow;
+    });
+    if (nameMatch) return nameMatch;
+  }
+
   return WORLD_COUNTRIES_FEATURE_COLLECTION.features.find((f) => {
     const fn = (f.properties?.name || '').toLowerCase();
-    return fn === cleanId || fn.includes(cleanId) || cleanId.includes(fn);
+    return fn.startsWith(cleanId) || cleanId.startsWith(fn);
   });
 }
 
 /**
- * Helper to test if a GeoJSON country feature matches a given country ID or country name
+ * Helper to test if a GeoJSON country feature matches a given country ID or country name (strict exact matching)
  */
 export function isMatchingCountryFeature(
   featureName: string,
   countryId?: string,
   countryName?: string
 ): boolean {
-  if (!featureName) return false;
-  const fLow = featureName.toLowerCase();
+  if (!featureName || (!countryId && !countryName)) return false;
+  const fLow = featureName.toLowerCase().trim();
 
   if (countryId) {
     const alias = COUNTRY_ALIASES[countryId]?.toLowerCase();
-    if (alias && (fLow === alias || fLow.includes(alias) || alias.includes(fLow))) {
+    if (alias && fLow === alias) {
       return true;
     }
-    const cleanId = countryId.toLowerCase().replace(/_/g, ' ');
-    if (fLow === cleanId || fLow.includes(cleanId) || cleanId.includes(fLow)) {
+    const cleanId = countryId.toLowerCase().replace(/_/g, ' ').trim();
+    if (fLow === cleanId) {
       return true;
+    }
+    const country = getCountryById(countryId);
+    if (country) {
+      if (fLow === country.name.toLowerCase().trim()) {
+        return true;
+      }
     }
   }
 
   if (countryName) {
-    const cLow = countryName.toLowerCase();
-    if (fLow === cLow || fLow.includes(cLow) || cLow.includes(fLow)) {
+    const cLow = countryName.toLowerCase().trim();
+    if (fLow === cLow) {
       return true;
     }
   }
 
   return false;
+}
+
+/**
+ * Helper to test if a GeoJSON country feature belongs to a given continent
+ */
+export function isMatchingContinentFeature(
+  featureName: string,
+  continentId: string
+): boolean {
+  if (!featureName || !continentId) return false;
+  const continent = getContinentById(continentId);
+  if (!continent) return false;
+
+  const fLow = featureName.toLowerCase().trim();
+
+  return continent.countries.some((c) => {
+    const alias = COUNTRY_ALIASES[c.id]?.toLowerCase();
+    if (alias && fLow === alias) return true;
+    const cleanId = c.id.toLowerCase().replace(/_/g, ' ').trim();
+    if (fLow === cleanId) return true;
+    if (fLow === c.name.toLowerCase().trim()) return true;
+    return false;
+  });
 }
 
 

@@ -56,6 +56,7 @@ export function generateQuizQuestions(config: QuizConfig): Question[] {
         targetCoords: cont.centerCoords,
         options,
         correctOptionIndex: options.indexOf(cont.name),
+        continentId: cont.id,
         hint: `Code du continent: ${cont.code}`,
       });
     });
