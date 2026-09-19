@@ -109,6 +109,7 @@ export function generateQuizQuestions(config: QuizConfig): Question[] {
         options,
         correctOptionIndex: options.indexOf(country.capital),
         countryId: country.id,
+        continentId: country.continentId,
         hint: `Située en ${country.name}`,
       });
     });

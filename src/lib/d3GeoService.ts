@@ -85,6 +85,39 @@ export function getCountryGeoFeature(countryId: string): Feature<Geometry, GeoJs
 }
 
 /**
+ * Helper to test if a GeoJSON country feature matches a given country ID or country name
+ */
+export function isMatchingCountryFeature(
+  featureName: string,
+  countryId?: string,
+  countryName?: string
+): boolean {
+  if (!featureName) return false;
+  const fLow = featureName.toLowerCase();
+
+  if (countryId) {
+    const alias = COUNTRY_ALIASES[countryId]?.toLowerCase();
+    if (alias && (fLow === alias || fLow.includes(alias) || alias.includes(fLow))) {
+      return true;
+    }
+    const cleanId = countryId.toLowerCase().replace(/_/g, ' ');
+    if (fLow === cleanId || fLow.includes(cleanId) || cleanId.includes(fLow)) {
+      return true;
+    }
+  }
+
+  if (countryName) {
+    const cLow = countryName.toLowerCase();
+    if (fLow === cLow || fLow.includes(cLow) || cLow.includes(fLow)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+
+/**
  * Generate high-precision World Map SVG paths using Natural Earth 1 projection
  */
 export function generateWorldMapPaths(width: number, height: number) {

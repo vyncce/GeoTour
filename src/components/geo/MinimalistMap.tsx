@@ -3,13 +3,14 @@
 import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import { GeoPoint } from '@/types/geo';
 import { cn } from '@/lib/utils';
-import { Star, MapPin, Compass, Navigation, ZoomIn, ZoomOut, Move } from 'lucide-react';
+import { Star, MapPin, Compass, Navigation, ZoomIn, ZoomOut, Move, Globe } from 'lucide-react';
 import {
   generateSingleCountryMap,
   generateContinentMapPaths,
   generateWorldMapPaths,
+  isMatchingCountryFeature,
 } from '@/lib/d3GeoService';
-import { CONTINENTS_DATA } from '@/data/geoDataset';
+import { CONTINENTS_DATA, getCountryById, getContinentById } from '@/data/geoDataset';
 
 export interface MapMarker {
   id: string;
@@ -54,7 +55,40 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
   highlightCountryName,
   className,
 }) => {
-  // Zoom & Pan with middle mouse button drag
+  // Determine effective continent if countryId is given
+  const effectiveContinentId = useMemo(() => {
+    if (continentId) return continentId;
+    if (countryId) {
+      const c = getCountryById(countryId);
+      return c?.continentId;
+    }
+    return undefined;
+  }, [continentId, countryId]);
+
+  // Compute default view mode
+  const defaultMode = useMemo<'country' | 'continent' | 'world'>(() => {
+    if (countryId) return 'country';
+    if (effectiveContinentId) return 'continent';
+    return 'world';
+  }, [countryId, effectiveContinentId]);
+
+  // Active view mode: 'country' (zoomed), 'continent' (regional), or 'world' (global)
+  const [viewMode, setViewMode] = useState<'country' | 'continent' | 'world'>(defaultMode);
+
+  // Available view modes for switcher
+  const availableModes = useMemo(() => {
+    const list: { id: 'country' | 'continent' | 'world'; label: string; icon: string }[] = [];
+    if (countryId) {
+      list.push({ id: 'country', label: 'Zoom Pays', icon: '🔍' });
+    }
+    if (effectiveContinentId) {
+      list.push({ id: 'continent', label: 'Continent', icon: '🗺️' });
+    }
+    list.push({ id: 'world', label: 'Monde', icon: '🌍' });
+    return list;
+  }, [countryId, effectiveContinentId]);
+
+  // Zoom & Pan state
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [panOffset, setPanOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState<boolean>(false);
@@ -69,34 +103,34 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
 
   // 2. Continent Natural Earth Cartography
   const continentMap = useMemo(() => {
-    if (countryId || !continentId) return null;
-    const continentObj = CONTINENTS_DATA.find((c) => c.id === continentId);
+    if (!effectiveContinentId) return null;
+    const continentObj = CONTINENTS_DATA.find((c) => c.id === effectiveContinentId);
     const countryIds = continentObj ? continentObj.countries.map((c) => c.id) : [];
     return generateContinentMapPaths(countryIds, MAP_WIDTH, MAP_HEIGHT, 35);
-  }, [countryId, continentId]);
+  }, [effectiveContinentId]);
 
   // 3. World Natural Earth Cartography (Default / Global)
   const worldMap = useMemo(() => {
-    if (countryId || continentId) return null;
     return generateWorldMapPaths(MAP_WIDTH, MAP_HEIGHT);
-  }, [countryId, continentId]);
+  }, []);
 
-  // Reset zoom & pan when country or continent changes
+  // Reset view mode, zoom & pan when country or continent changes
   useEffect(() => {
+    setViewMode(defaultMode);
     setZoomLevel(1);
     setPanOffset({ x: 0, y: 0 });
-  }, [countryId, continentId]);
+  }, [defaultMode, countryId, continentId]);
 
-  // Unified projector function
+  // Unified projector function based on active viewMode
   const projectPoint = useMemo(() => {
-    if (countryMap) return countryMap.project;
-    if (continentMap) return continentMap.project;
+    if (viewMode === 'country' && countryMap) return countryMap.project;
+    if (viewMode === 'continent' && continentMap) return continentMap.project;
     if (worldMap) return worldMap.project;
     return (lng: number, lat: number): [number, number] => [
       ((lng + 180) / 360) * MAP_WIDTH,
       ((90 - lat) / 180) * MAP_HEIGHT,
     ];
-  }, [countryMap, continentMap, worldMap]);
+  }, [viewMode, countryMap, continentMap, worldMap]);
 
   // Helper to get screen percentage coordinates for any marker
   const getMarkerPosition = (coords: GeoPoint): { left: string; top: string } => {
@@ -173,6 +207,10 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
     };
   }, [isPanning, handleMouseMove, handleMouseUp]);
 
+  // Country name display resolution
+  const countryObj = countryId ? getCountryById(countryId) : null;
+  const continentObj = effectiveContinentId ? getContinentById(effectiveContinentId) : null;
+
   return (
     <div
       ref={containerRef}
@@ -231,7 +269,7 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
         }}
       >
         {/* 1. SINGLE COUNTRY NATURAL EARTH VIEW */}
-        {countryMap && (
+        {viewMode === 'country' && countryMap && (
           <svg
             viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
             className="absolute inset-0 w-full h-full transition-all duration-300 ease-out"
@@ -258,7 +296,7 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
         )}
 
         {/* 2. CONTINENT NATURAL EARTH VIEW */}
-        {continentMap && (
+        {viewMode === 'continent' && continentMap && (
           <svg
             viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
             className="absolute inset-0 w-full h-full transition-all duration-300 ease-out"
@@ -274,11 +312,13 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
               opacity="0.3"
             />
 
-            {/* Continent Country Features */}
+            {/* Continent Country Features with Highlight for target country */}
             {continentMap.countryPaths.map((c) => {
-              const isTarget =
-                targetId === c.id ||
-                (targetName && c.name.toLowerCase().includes(targetName.toLowerCase()));
+              const isTarget = isMatchingCountryFeature(
+                c.name,
+                countryId,
+                highlightCountryName || targetName || countryObj?.name
+              );
 
               return (
                 <path
@@ -287,7 +327,7 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
                   className={cn(
                     'transition-all duration-300',
                     isTarget
-                      ? 'fill-emerald-600/50 stroke-emerald-400 stroke-2 drop-shadow-[0_0_10px_rgba(16,185,129,0.5)]'
+                      ? 'fill-emerald-600/70 stroke-emerald-300 stroke-2 drop-shadow-[0_0_15px_rgba(16,185,129,0.8)]'
                       : 'fill-slate-800/90 stroke-slate-700/80 stroke-1 hover:fill-slate-750'
                   )}
                 />
@@ -297,7 +337,7 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
         )}
 
         {/* 3. WORLD NATURAL EARTH 1 VIEW */}
-        {worldMap && (
+        {viewMode === 'world' && worldMap && (
           <svg
             viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
             className="absolute inset-0 w-full h-full transition-all duration-300 ease-out"
@@ -316,14 +356,27 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
               opacity="0.4"
             />
 
-            {/* World Countries */}
-            {worldMap.countryPaths.map((c) => (
-              <path
-                key={c.id}
-                d={c.d}
-                className="fill-slate-800/90 stroke-slate-700/70 stroke-0.8 hover:fill-slate-750 transition-colors"
-              />
-            ))}
+            {/* World Countries with Highlight for target country */}
+            {worldMap.countryPaths.map((c) => {
+              const isTarget = isMatchingCountryFeature(
+                c.name,
+                countryId,
+                highlightCountryName || targetName || countryObj?.name
+              );
+
+              return (
+                <path
+                  key={c.id}
+                  d={c.d}
+                  className={cn(
+                    'transition-all duration-300',
+                    isTarget
+                      ? 'fill-emerald-500/85 stroke-emerald-300 stroke-1.5 drop-shadow-[0_0_12px_rgba(16,185,129,0.9)]'
+                      : 'fill-slate-800/90 stroke-slate-700/70 stroke-0.8 hover:fill-slate-750 transition-colors'
+                  )}
+                />
+              );
+            })}
           </svg>
         )}
 
@@ -429,8 +482,52 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
         </div>
       </div>
 
+      {/* View Mode Switcher Pills (Pays / Continent / Monde) */}
+      {availableModes.length > 1 && (
+        <div className="absolute top-4 left-4 z-20 flex items-center bg-slate-900/90 backdrop-blur-md p-1 rounded-2xl border border-slate-800 shadow-xl">
+          {availableModes.map((mode) => (
+            <button
+              key={mode.id}
+              onClick={() => {
+                setViewMode(mode.id);
+                setZoomLevel(1);
+                setPanOffset({ x: 0, y: 0 });
+              }}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all min-h-9',
+                viewMode === mode.id
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
+                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50'
+              )}
+            >
+              <span>{mode.icon}</span>
+              <span className="hidden sm:inline">{mode.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Floating Zoom & Pan Controls */}
       <div className="absolute top-4 right-4 z-20 flex flex-col gap-1.5 bg-slate-900/80 backdrop-blur-md p-1.5 rounded-2xl border border-slate-800/80 shadow-lg">
+        {/* Quick Toggle / Dezoom to World Map */}
+        {availableModes.length > 1 && (
+          <button
+            onClick={() => {
+              setViewMode((current) => (current === 'world' ? defaultMode : 'world'));
+              setZoomLevel(1);
+              setPanOffset({ x: 0, y: 0 });
+            }}
+            className={cn(
+              'p-2 min-h-10 min-w-10 flex items-center justify-center rounded-xl transition',
+              viewMode === 'world'
+                ? 'bg-emerald-600 text-white'
+                : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
+            )}
+            title={viewMode === 'world' ? 'Revenir au zoom pays' : 'Dézoomer : Resituer dans le Monde entier'}
+          >
+            <Globe className="h-4 w-4" />
+          </button>
+        )}
         <button
           onClick={() => setZoomLevel((z) => Math.min(3.5, z + 0.3))}
           className="p-2 min-h-10 min-w-10 flex items-center justify-center rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition"
@@ -458,19 +555,32 @@ export const MinimalistMap: React.FC<MinimalistMapProps> = ({
       </div>
 
       {/* Helper Pill: Middle Mouse Pan Instructions */}
-      <div className="absolute top-4 left-4 flex items-center gap-2 p-1.5 px-2.5 rounded-2xl bg-slate-900/70 backdrop-blur-md border border-slate-800/60 text-slate-400 text-[10px] pointer-events-none shadow-md">
+      <div className="absolute bottom-4 right-4 flex items-center gap-2 p-1.5 px-2.5 rounded-2xl bg-slate-900/70 backdrop-blur-md border border-slate-800/60 text-slate-400 text-[10px] pointer-events-none shadow-md">
         <Move className="w-3.5 h-3.5 text-emerald-400" />
-        <span className="hidden sm:inline">Clic molette enfoncé + glisser pour déplacer</span>
-        <span className="sm:hidden">Molette : Déplacer</span>
+        <span className="hidden sm:inline">Clic molette enfoncé + glisser</span>
+        <span className="sm:hidden">Molette : Pan</span>
       </div>
 
-      {/* Country Name Badge Overlay */}
-      {(highlightCountryName || countryId) && (
-        <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-800 text-slate-200 text-xs font-bold pointer-events-none shadow-lg">
+      {/* Country Name / Location Badge Overlay */}
+      {(highlightCountryName || countryObj || countryId) && (
+        <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/85 backdrop-blur-md border border-slate-800 text-slate-200 text-xs font-bold pointer-events-none shadow-lg">
           <Navigation className="w-3.5 h-3.5 text-emerald-400 fill-current" />
-          <span>{highlightCountryName || countryId?.toUpperCase()}</span>
+          <span>
+            {countryObj ? `${countryObj.flag} ${countryObj.name}` : highlightCountryName || countryId?.toUpperCase()}
+          </span>
+          {viewMode === 'world' && (
+            <span className="text-[10px] text-emerald-400 font-normal border-l border-slate-700 pl-2">
+              (Vue Monde)
+            </span>
+          )}
+          {viewMode === 'continent' && continentObj && (
+            <span className="text-[10px] text-emerald-400 font-normal border-l border-slate-700 pl-2">
+              ({continentObj.name})
+            </span>
+          )}
         </div>
       )}
     </div>
   );
 };
+
